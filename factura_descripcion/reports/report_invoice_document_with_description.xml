@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_invoice_document_with_description" inherit_id="account.report_invoice_document">
+
+            <xpath expr="//p[@name='payment_term']" position="after">
+                <p t-if="o.payments" name="payment_difference_description">
+                    <p t-if="o.payments[-1].payment_difference_handling == 'reconcile' and o.payments[-1].move_line_ids">
+                        Descripción de diferencia de pago:
+                        <span t-field="o.payments[-1].move_line_ids[-1].name"/>
+                    </p>
+                </p>
+            </xpath>
+
+        </template>
+    </data>
+</odoo>

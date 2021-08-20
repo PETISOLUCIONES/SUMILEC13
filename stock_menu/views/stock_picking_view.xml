@@ -1,0 +1,65 @@
+<odoo>
+  <data>
+
+        <record id="view_picking_form_inherit" model="ir.ui.view">
+            <field name="name">stock.picking.form.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="partner_nit"/>
+                    <field name="partner_city"/>
+                    <field name="partner_address"/>
+                    <field name="partner_state"/>
+                </xpath>
+                <xpath expr="//field[@name='picking_type_id']" position="after">
+                    <field name="seller_name"/>
+                </xpath>
+                <xpath expr="//field[@name='origin']" position="after">
+                    <field name="purchase_id"  />
+                    <field name="currency_id" invisible="True" />
+                    <field name="estado_so"/>
+                    <field name="total_orden"/>
+                    <field name="total_su"/>
+                    <field name="plazo_pago"/>
+                    <field name="factura_relacionada"/>
+                    <field name="estado_factura"/>
+                </xpath>
+                <xpath expr="//field[@name='owner_id']" position="after">
+                    <field name="tipo_entrega"/>
+                    <field name="estado"/>
+                </xpath>
+                <xpath expr="//form/sheet/notebook/page[4]" position="after">
+                   <page string="Seguimiento">
+                       <group>
+                           <group>
+                               <field name="empresa_transpostadora"/>
+                               <field name="unidades"/>
+                               <field name="peso_kg"/>
+                               <field name="volumen"/>
+                            </group>
+                           <group>
+                               <field name="fecha_hora_envio"/>
+                               <field name="numero_guia"/>
+                               <field name="empacado_por"/>
+                           </group>
+                       </group>
+                   </page>
+                    <page string="Adicionales">
+                       <group>
+                           <group>
+                               <field name="total_productos"/>
+                               <field name="mano_obra"/>
+                               <field name="total_produccion"/>
+                            </group>
+                           <group>
+                               <field name="es_produccion"/>
+                               <field name="orden_produccion" domain="[['picking_type_id.id','=',11]]" groups="base.group_system,stock.group_stock_manager" />
+                           </group>
+                       </group>
+                   </page>
+                 </xpath>
+            </field>
+        </record>
+  </data>
+</odoo>
