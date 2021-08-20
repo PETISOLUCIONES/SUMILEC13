@@ -13,13 +13,14 @@ class StockPicking(models.Model):
     seller_name = fields.Char(related='partner_id.user_id.name', string='Vendedor', readonly=True, store=True)
     partner_nit = fields.Char(related='partner_id.vat', string='NIT', readonly=True, store=True)
     purchase_id = fields.Many2one('purchase.order', related='move_lines.purchase_line_id.order_id', string='Pedidos de compra', readonly=True)
-    estado_so = fields.Selection(	[['draft', 'Cotizacion'],
+    '''estado_so = fields.Selection(	[['draft', 'Cotizacion'],
                                       ['sent', 'Cotizacion Enviada'],
                                       ['credit_limit', 'Limite de Credito'],
                                       ['sale', 'Orden de Venta'],
                                       ['done', 'Bloqueado'],
                                       ['cancel', 'Cancelado']],
-                             string='Estado SO', related='sale_id.state', readonly=True, store=True)
+                             string='Estado SO', related='sale_id.state', readonly=True, store=True)'''
+    #estado_so = fields.Char(string='Estado SO', compute='_get_state_sale', readonly=True, store=True)
     total_orden = fields.Monetary(string='Total orden', related='sale_id.amount_total')
     total_su = fields.Float(string='Total SU', compute='_get_total_su')
     plazo_pago = fields.Char(string='Plazo de pago', related='sale_id.payment_term_id.name', store=True)
@@ -60,6 +61,8 @@ class StockPicking(models.Model):
     currency_id = fields.Many2one(
         string="Currency", related="company_id.currency_id", readonly=True
     )
+
+
 
     @api.depends('mano_obra')
     def _get_total_production(self):
