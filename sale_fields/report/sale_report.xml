@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="category_report" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//table/thead/tr/th[@name='th_description']" position="after">
+            <th name="th_category"><strong>Marca</strong></th>
+        </xpath>
+        <xpath expr="//div[@name='expiration_date']" position="after">
+            <div t-if="doc.expected_date" class="col-auto mw-100 mb-2" name="expiration_date">
+                <strong>Fecha de entrega:</strong>
+                <p class="m-0" t-field="doc.expected_date"/>
+            </div>
+        </xpath>
+        <xpath expr="//table/tbody/t[@t-foreach='doc.order_line']//td[@name='td_name']" position="after">
+            <td class="text-center">
+                <span t-field="line.category_id.name"/>
+            </td>
+        </xpath>
+    </template>
+</odoo>
+
