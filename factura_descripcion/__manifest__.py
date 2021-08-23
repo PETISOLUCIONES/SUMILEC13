@@ -23,5 +23,6 @@
     # always loaded
     'data': [
         'reports/report_invoice_document_with_description.xml',
+        'reports/report_payment_receipt_document_with_journal_items.xml',
     ],
 }
