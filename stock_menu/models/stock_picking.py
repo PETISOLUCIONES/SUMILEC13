@@ -13,13 +13,13 @@ class StockPicking(models.Model):
     seller_name = fields.Char(related='partner_id.user_id.name', string='Vendedor', readonly=True, store=True)
     partner_nit = fields.Char(related='partner_id.vat', string='NIT', readonly=True, store=True)
     purchase_id = fields.Many2one('purchase.order', related='move_lines.purchase_line_id.order_id', string='Pedidos de compra', readonly=True)
-    '''estado_so = fields.Selection(	[['draft', 'Cotizacion'],
+    estado_so = fields.Selection(	[['draft', 'Cotizacion'],
                                       ['sent', 'Cotizacion Enviada'],
                                       ['credit_limit', 'Limite de Credito'],
                                       ['sale', 'Orden de Venta'],
                                       ['done', 'Bloqueado'],
                                       ['cancel', 'Cancelado']],
-                             string='Estado SO', related='sale_id.state', readonly=True, store=True)'''
+                             string='Estado SO', related='sale_id.state', readonly=True, store=True)
     #estado_so = fields.Char(string='Estado SO', compute='_get_state_sale', readonly=True, store=True)
     total_orden = fields.Monetary(string='Total orden', related='sale_id.amount_total')
     total_su = fields.Float(string='Total SU', compute='_get_total_su')
@@ -46,13 +46,13 @@ class StockPicking(models.Model):
                                                ["Transprensa","Transprensa"],
                                                ["Transporte Propio","Transporte Propio"],
                                                ["Trasportado o recogido por el cliente","Transportado o Recogido por el cliente"],
-                                               ["Otro","Otro"]], string='Tipo de transporte')
+                                               ["Otro","Otro"]], string='Tipo de transporte', track_visibility='onchange')
     unidades = fields.Float(string='Unidades')
     peso_kg = fields.Float(string='Peso (Kg)')
     volumen = fields.Float(string='Volumen')
-    fecha_hora_envio = fields.Date(string='Fecha y Hora de Envio')
-    numero_guia = fields.Char(string='Numero de guia')
-    empacado_por = fields.Char(string='Empacado Por')
+    fecha_hora_envio = fields.Date(string='Fecha y Hora de Envio', track_visibility='onchange')
+    numero_guia = fields.Char(string='Numero de guia', track_visibility='onchange')
+    empacado_por = fields.Char(string='Empacado Por', track_visibility='onchange')
     total_productos = fields.Monetary(string='Total Productos', compute='_get_total_productos')
     mano_obra = fields.Monetary(string='Mano de obra')
     total_produccion = fields.Monetary(string='Total Produccion', compute='_get_total_production')
