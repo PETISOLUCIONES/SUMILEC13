@@ -82,9 +82,13 @@ class AccountMove(models.Model):
     def _default_payment_method(self):
         return self.env['dian.paymentmethod'].search([('code', '=', '1')], limit=1).id
 
+    def _default_payment_mean(self):
+        return self.env['dian.paymentmean'].search([('code', '=', '1')], limit=1).id
+
+
     payment_method_id = fields.Many2one("dian.paymentmethod", string='Método de pago', default=_default_payment_method)
 
-    payment_mean_id = fields.Many2one('dian.paymentmean', string='Forma de pago')
+    payment_mean_id = fields.Many2one('dian.paymentmean', string='Forma de pago', default=_default_payment_mean)
     description_code_credit = fields.Many2one("dian.creditnoteconcept", string='Concepto Nota de Credito')
     description_code_debit = fields.Many2one("dian.debitnoteconcept", string='Concepto Nota de Débito')
     debit_note = fields.Boolean(string='Nota débito', related='journal_id.debit_note')
@@ -580,12 +584,13 @@ class AccountMove(models.Model):
         body = open(new_file, "r").read()
 
         responsews = requests.post(url, data=body.encode('utf-8'), headers=headers)
-        respuesta = eval(responsews.content.decode('utf-8'))
+
         tipodato = type(responsews)
         resultados = ""
         attach = ""
         respuestaws = ""
         if responsews.status_code == 200:
+            respuesta = eval(responsews.content.decode('utf-8'))
             if 'Respuesta' in respuesta:
                 resultados = respuesta['Respuesta']
                 attach = self.GetAttach(resultados)
