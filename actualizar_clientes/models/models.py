@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+import re
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
 
     def update_vat(self):
-        partners = self.env['res.partner'].search([('vat_num', '=', False), ('vat', '!=', False), ()])
+        partners = self.env['res.partner'].search([('vat_num', '=', False), ('vat', '!=', False)])
         for partner in partners:
-            if partner.vat and not partner.vat_num:
+            if partner.vat and not partner.vat_num and partner.l10n_co_document_type:
                 numero = partner.GetNitCompany(partner.vat)
-                if 2 < len(numero) < 12:
+                if 2 < len(numero) < 12 and not re.match("^[0-9]+$", numero) is None:
                     vals = {'vat_type': partner.change_vat_type(partner), 'vat_num': numero}
                     if partner.l10n_co_document_type == 'rut':
                         dv = partner.calcular_dv(numero)

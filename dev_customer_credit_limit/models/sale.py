@@ -150,8 +150,103 @@ class sale_order(models.Model):
             self.action_confirm()
         return True
 
+    def action_sale_limiteCredito_excedido(self):
+        partner_id = self.partner_id
+
+        if self.partner_id.parent_id and not self.partner_id.check_credit:
+            partner_id = self.partner_id.parent_id
+        partner_ids = [partner_id.id]
+        for partner in partner_id.child_ids:
+            partner_ids.append(partner.id)
+
+        if partner_id.check_credit:
+            domain = [
+                ('order_id.partner_id', 'in', partner_ids),
+                ('order_id.state', 'in', ['sale', 'credit_limit', 'done'])]
+            order_lines = self.env['sale.order.line'].search(domain)
+
+            order = []
+            to_invoice_amount = 0.0
+            for line in order_lines:
+                not_invoiced = line.product_uom_qty - line.qty_invoiced
+                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                taxes = line.tax_id.compute_all(
+                    price, line.order_id.currency_id,
+                    not_invoiced,
+                    product=line.product_id, partner=line.order_id.partner_id)
+                if line.order_id.id not in order:
+                    if line.order_id.invoice_ids:
+                        for inv in line.order_id.invoice_ids:
+                            if inv.state == 'draft':
+                                order.append(line.order_id.id)
+                                break
+                    else:
+                        order.append(line.order_id.id)
+
+                to_invoice_amount += taxes['total_included']
+
+            domain = [
+                ('move_id.partner_id', 'in', partner_ids),
+                ('move_id.state', '=', 'draft'),
+                ('sale_line_ids', '!=', False)]
+            draft_invoice_lines = self.env['account.move.line'].search(domain)
+            for line in draft_invoice_lines:
+                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                taxes = line.tax_ids.compute_all(
+                    price, line.move_id.currency_id,
+                    line.quantity,
+                    product=line.product_id, partner=line.move_id.partner_id)
+                to_invoice_amount += taxes['total_included']
+
+            # We sum from all the invoices lines that are in draft and not linked
+            # to a sale order
+            domain = [
+                ('move_id.partner_id', 'in', partner_ids),
+                ('move_id.state', '=', 'draft'),
+                ('sale_line_ids', '=', False)]
+            draft_invoice_lines = self.env['account.move.line'].search(domain)
+            draft_invoice_lines_amount = 0.0
+            invoice = []
+            for line in draft_invoice_lines:
+                price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                taxes = line.tax_ids.compute_all(
+                    price, line.move_id.currency_id,
+                    line.quantity,
+                    product=line.product_id, partner=line.move_id.partner_id)
+                draft_invoice_lines_amount += taxes['total_included']
+                if line.move_id.id not in invoice:
+                    invoice.append(line.move_id.id)
+
+            draft_invoice_lines_amount = "{:.2f}".format(draft_invoice_lines_amount)
+            to_invoice_amount = "{:.2f}".format(to_invoice_amount)
+            draft_invoice_lines_amount = float(draft_invoice_lines_amount)
+            to_invoice_amount = float(to_invoice_amount)
+            available_credit = partner_id.credit_limit - partner_id.credit - to_invoice_amount - draft_invoice_lines_amount
+
+            if self.amount_total > available_credit:
+                imd = self.env['ir.model.data']
+                exceeded_amount = (
+                                          to_invoice_amount + draft_invoice_lines_amount + partner_id.credit + self.amount_total) - partner_id.credit_limit
+                exceeded_amount = "{:.2f}".format(exceeded_amount)
+                exceeded_amount = float(exceeded_amount)
+
+                vals_wiz = {
+                    'partner_id': partner_id.id,
+                    'sale_orders': str(len(order)) + ' Valor de la orden de venta : ' + str(to_invoice_amount),
+                    'invoices': str(len(invoice)) + ' Valor del borrador de la factura : ' + str(
+                        draft_invoice_lines_amount),
+                    'current_sale': self.amount_total or 0.0,
+                    'exceeded_amount': exceeded_amount,
+                    'credit': partner_id.credit,
+                    'credit_limit_on_hold': partner_id.credit_limit_on_hold,
+                }
+                wiz_id = self.env['customer.limit.wizard'].create(vals_wiz)
+                vals_wiz.update({"wiz_id": wiz_id.id})
+                return vals_wiz
+                
+
     def _make_url(self, model='sale.order'):
-        base_url = self.env['ir.config_parameter'].get_param('web.base.url', default='http://localhost:8069')
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url', default='http://localhost:8069')
         if base_url:
             base_url += '/web/login?db=%s&login=%s&key=%s#id=%s&model=%s' % (self._cr.dbname, '', '', self.id, model)
         return base_url

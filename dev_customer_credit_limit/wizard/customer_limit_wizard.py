@@ -25,6 +25,17 @@ class customer_limit_wizard(models.TransientModel):
             partner_id= partner_id.parent_id
         partner_id.credit_limit_on_hold = self.credit_limit_on_hold
         return True
+
+    def set_credit_limit_state_ventas(self, id_orden1):
+        order_id = self.env['sale.order'].browse(id_orden1)
+        order_id.state = 'credit_limit'
+        order_id.exceeded_amount = self.exceeded_amount
+        order_id.send_mail_approve_credit_limit()
+        partner_id = self.partner_id
+        if partner_id.parent_id:
+            partner_id= partner_id.parent_id
+        partner_id.credit_limit_on_hold = self.credit_limit_on_hold
+        return True
     
     current_sale = fields.Float('Cotización actual')
     exceeded_amount = fields.Float('Cantidad excedida')
