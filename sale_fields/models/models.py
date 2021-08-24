@@ -27,3 +27,4 @@ class SaleOrderLine(models.Model):
     category_id = fields.Many2one('product.category', related='product_id.categ_id', string='Marca o Categoria')
 
 
+

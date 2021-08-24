@@ -50,7 +50,7 @@ class StockPicking(models.Model):
     unidades = fields.Float(string='Unidades')
     peso_kg = fields.Float(string='Peso (Kg)')
     volumen = fields.Float(string='Volumen')
-    fecha_hora_envio = fields.Date(string='Fecha y Hora de Envio', track_visibility='onchange')
+    fecha_hora_envio = fields.Datetime(string='Fecha y Hora de Envio', track_visibility='onchange')
     numero_guia = fields.Char(string='Numero de guia', track_visibility='onchange')
     empacado_por = fields.Char(string='Empacado Por', track_visibility='onchange')
     total_productos = fields.Monetary(string='Total Productos', compute='_get_total_productos')
