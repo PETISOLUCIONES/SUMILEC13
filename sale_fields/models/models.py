@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api
 
+
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
 
@@ -27,4 +28,14 @@ class SaleOrderLine(models.Model):
     category_id = fields.Many2one('product.category', related='product_id.categ_id', string='Marca o Categoria')
 
 
+class ProductTemplate(models.Model):
+    _inherit = 'product.template'
+
+    product_seller_code = fields.Char(string="Referencia Proveedor", compute="_get_product_seller_code", readonly=True)
+
+    def _get_product_seller_code(self):
+        if self.seller_ids and self.seller_ids[0].product_code:
+            self.product_seller_code = self.seller_ids[0].product_code
+        else:
+            self.product_seller_code = ""
 

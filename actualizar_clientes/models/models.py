@@ -7,15 +7,16 @@ class ResPartner(models.Model):
 
 
     def update_vat(self):
-        partners = self.env['res.partner'].search([('vat_num', '=', False), ('vat', '!=', False)])
+        partners = self.env['res.partner'].search([('vat_num', '=', False), ('vat', '!=', False), ()])
         for partner in partners:
             if partner.vat and not partner.vat_num:
                 numero = partner.GetNitCompany(partner.vat)
-                vals = {'vat_type': partner.change_vat_type(partner), 'vat_num': numero}
-                if partner.l10n_co_document_type == 'rut':
-                    dv = partner.calcular_dv(numero)
-                    vals['vat_vd'] = dv
-                partner.write(vals)
+                if 2 < len(numero) < 12:
+                    vals = {'vat_type': partner.change_vat_type(partner), 'vat_num': numero}
+                    if partner.l10n_co_document_type == 'rut':
+                        dv = partner.calcular_dv(numero)
+                        vals['vat_vd'] = dv
+                    partner.write(vals)
 
 
     def GetNitCompany(self, number):

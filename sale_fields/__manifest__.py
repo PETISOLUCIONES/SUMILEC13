@@ -25,6 +25,7 @@
     'data': [
         'views/views.xml',
         'views/res_partner.xml',
+        'views/product_template.xml',
         'report/sale_report.xml',
     ],
 
