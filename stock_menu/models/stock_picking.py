@@ -39,7 +39,7 @@ class StockPicking(models.Model):
                                ["No aplica para flete","No aplica para flete"],
                                ["Terminado","Terminado"],
                                ["Espera de Formulario","Espera de Formulario"],
-                               ["En espera de fecha de confirmación de despacho","En espera de fecha de confirmación de despacho"]], string='Estado de alistamiento')
+                               ["En espera de fecha de confirmación de despacho","En espera de fecha de confirmación de despacho"]], string='Estado de alistamiento', track_visibility='onchange')
     empresa_transpostadora = fields.Selection([["Servientrega","Servientrega"],
                                                ["coordinadora","Coordinadora"],
                                                ["Envía","Envía"],
@@ -87,6 +87,15 @@ class StockPicking(models.Model):
                     if linea.product_id.id == venta.product_id.id:
                         total += venta.price_total
             record['total_su'] = total
+
+    @api.model
+    def create(self, vals):
+        if 'backorder_id' in vals:
+            data = [vals.pop(key, None) for key in ['empresa_transpostadora', 'unidades',
+                                              'peso_kg', 'volumen',
+                                              'fecha_hora_envio', 'numero_guia',
+                                              'empacado_por']]
+        return super(StockPicking, self).create(vals)
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
