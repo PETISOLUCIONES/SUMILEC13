@@ -235,10 +235,58 @@ class PartnerInfoExtended(models.Model):
 		This function throws and error if there is no document type selected.
 		@return: void
 		"""
-		if self.l10n_co_document_type is not "false":
-			if self.l10n_co_document_type is False:
-				msg = _('¡Error! Elija un tipo de identificación')
-				raise exceptions.ValidationError(msg)
+		if self.l10n_co_document_type:
+			self.write({'vat_type': self.change_vat_type_nit(self)})
+		elif self.vat_type:
+			self.write({'l10n_co_document_type': self.change_vat_type_dos_nit(self)})
+		#if self.l10n_co_document_type is not "false":
+		if self.l10n_co_document_type is False:
+			msg = _('¡Error! Elija un tipo de identificación')
+			raise exceptions.ValidationError(msg)
+
+	def change_vat_type_nit(self, partner):
+		if partner.l10n_co_document_type == 'rut':
+			return '31'
+		elif partner.l10n_co_document_type == 'id_document':
+			return '13'
+		elif partner.l10n_co_document_type == 'id_card':
+			return '12'
+		elif partner.l10n_co_document_type == 'passport':
+			return '41'
+		elif partner.l10n_co_document_type == 'foreign_id_card':
+			return '22'
+		elif partner.l10n_co_document_type == 'external_id':
+			return ''
+		elif partner.l10n_co_document_type == 'diplomatic_card':
+			return ''
+		elif partner.l10n_co_document_type == 'residence_document':
+			return ''
+		elif partner.l10n_co_document_type == 'civil_registration':
+			return '11'
+		elif partner.l10n_co_document_type == 'national_citizen_id':
+			return '13'
+
+	def change_vat_type_dos_nit(self, partner):
+		if partner.vat_type == '31':
+			return 'rut'
+		elif partner.vat_type == '13':
+			return 'id_document'
+		elif partner.vat_type == '12':
+			return 'id_card'
+		elif partner.vat_type == '41':
+			return 'passport'
+		elif partner.vat_type == '22':
+			return 'foreign_id_card'
+		elif partner.vat_type == '':
+			return ''
+		elif partner.vat_type == '':
+			return ''
+		elif partner.vat_type == '':
+			return ''
+		elif partner.vat_type == '11':
+			return 'civil_registration'
+		elif partner.vat_type == '13':
+			return 'national_citizen_id'
 
 
 

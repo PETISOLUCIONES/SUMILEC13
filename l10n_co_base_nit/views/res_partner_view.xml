@@ -46,8 +46,7 @@
             </field>
 
                 <field name="type" position="before">
-                <field name="companyBrandName"
-                       attrs="{'invisible':[('company_type', '!=', 'company')]}" />
+                <field name="companyBrandName" />
 
                 <field name="xbirthday" attrs="{'invisible':[('company_type', '=', 'company')]}" />
                 <field name="x_pn_retri" attrs="{'invisible':[('type', '=', 'delivery')]}" invisible="1"/>
