@@ -129,8 +129,16 @@ class AccountMove(models.Model):
     def action_post1(self):
 
         file = 'plantilla.xml'
-        full_file = os.path.abspath(os.path.join('', file))
-        doc_xml = ET.parse(full_file)
+        if self.env.company.ruta_plantilla:
+            ruta_plantilla = self.env.company.ruta_plantilla +'/' +file
+        else:
+            ruta_plantilla = file
+        full_file = os.path.abspath(os.path.join('', ruta_plantilla))
+        try:
+            doc_xml = ET.parse(full_file)
+        except:
+            raise UserError("No se encontró la plantilla en la ruta " + full_file)
+
 
         root = doc_xml.getroot()
         total_descuento = 0
@@ -273,8 +281,7 @@ class AccountMove(models.Model):
                 DateCalculationRate_c = '0'
                 Resolution_str = move.journal_id.sequence_id.resolution_id.resolution_resolution
                 ResolutionPrefix = move.journal_id.sequence_id.prefix
-                ResolutionDateInvoice = move.journal_id.sequence_id.resolution_id.resolution_resolution_date.strftime(
-                    '%Y-%m-%d')
+                ResolutionDateInvoice = move.journal_id.sequence_id.resolution_id.resolution_resolution_date.strftime('%Y-%m-%d')
                 ResolutionDateFrom = move.journal_id.sequence_id.resolution_id.resolution_date_from.strftime('%Y-%m-%d')
                 ResolutionDateTo = move.journal_id.sequence_id.resolution_id.resolution_date_to.strftime('%Y-%m-%d')
                 ResolutionRankFrom = str(move.journal_id.sequence_id.resolution_id.resolution_from)
@@ -487,7 +494,7 @@ class AccountMove(models.Model):
                                 MiscCodeDescription='Descuento',
                                 PercentAmt=str(((-1 * descuento) * 100) / totalLinea),
                                 MiscType='1', )
-                    datos.append(dato)
+                datos.append(dato)
                 i = i + 1
             self.GenerarLineasInvcMisc(datos, root)
 
@@ -553,18 +560,23 @@ class AccountMove(models.Model):
             move.EditaNodos('COOneTime', datos, root)
 
         directorio = "Facturacion/ArchivosXML/" + nit_company + "/"
-        directoriozip = "Facturacion/Zip/" + nit_company + "/"
+        #directoriozip = "Facturacion/Zip/" + nit_company + "/"
+
+
+        if self.env.company.ruta_plantilla:
+            ruta_xml = self.env.company.ruta_plantilla + "/ArchivosXML/" + nit_company + "/"
+        else:
+            ruta_xml = directorio
 
         try:
-            os.stat(directorio)
-            os.stat(directoriozip)
+            os.stat(ruta_xml)
+            #os.stat(directoriozip)
         except:
-            os.makedirs(directorio)
-            os.makedirs(directoriozip)
+            os.makedirs(ruta_xml)
+            #os.makedirs(directoriozip)
 
-        new_file = directorio + move.name + '.xml'
+        new_file = ruta_xml + move.name + '.xml'
 
-        # new_file = directorio + 'P126.xml'
         doc_xml.write(new_file)
         for move in self:
             ip_ws = str(move.company_id.ip_webservice)
@@ -869,11 +881,16 @@ class AccountMove(models.Model):
 
     def GetNitCompany(self, number):
         document = ''
-        if '-' in number:
-            document = number[0:number.find('-')]
-        else:
-            document = number
-        return document
+        try:
+            if '-' in number:
+                document = number[0:number.find('-')]
+            else:
+                document = number
+            return document
+        except:
+            return document
+
+
 
     def TypeDocumentCust(self, typedocument):
         type = ''
@@ -943,6 +960,7 @@ class Company(models.Model):
     software_id = fields.Char(string='ID del software')
     # city_id = fields.Many2one('res.city', string='Ciudad')
     ip_webservice = fields.Char(string='IP WebService')
+    ruta_plantilla = fields.Char(string='Ruta Plantilla')
 
 
 class ResCity(models.Model):

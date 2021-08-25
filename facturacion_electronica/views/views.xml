@@ -30,6 +30,7 @@
                        <field name="test_set"/>
                        <field name="software_id"/>
                        <field name="ip_webservice" groups="base.group_no_one" />
+                       <field name="ruta_plantilla" groups="base.group_no_one" />
                    </group>
                </group>
            </page>
