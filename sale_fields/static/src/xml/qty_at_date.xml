@@ -1,0 +1,17 @@
+<templates id="template" xml:space="preserve">
+
+    <div t-extend="sale_stock.QtyDetailPopOver">
+        <t t-jquery="t[t-if='!data.is_mto']" t-operation="append">
+            <tr>
+                <td><strong>No reservado</strong><br /><small>al <span t-esc="data.delivery_date"/></small></td>
+                <td><t t-esc='data.cantidad_disponible'/>
+                <t t-esc='data.product_uom.data.display_name'/></td>
+            </tr>
+            <tr>
+                <td><strong>% Mínimo Rentabilidad</strong></td>
+                <td><t t-esc='data.minimo_rentabilidad'/></td>
+            </tr>
+        </t>
+    </div>
+
+</templates>

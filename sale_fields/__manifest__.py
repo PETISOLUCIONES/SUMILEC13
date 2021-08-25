@@ -28,5 +28,6 @@
         'views/product_template.xml',
         'report/sale_report.xml',
     ],
+    'qweb': ['static/src/xml/qty_at_date.xml'],
 
 }

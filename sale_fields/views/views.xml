@@ -22,7 +22,12 @@
         <field name="arch" type="xml">
             <xpath expr="//tree//field[@name='name']" position="after">
                  <field name="category_id"/>
+                 <field name="cantidad_disponible" invisible="1"/>
+                 <field name="minimo_rentabilidad" invisible="1"/>
             </xpath>
+            <field name="payment_term_id" position="after">
+                <field name="x_studio_permitir_menor_al_costo" string="Permitir menor al costo" groups="base.group_system,base.group_erp_manager"/>
+          </field>
         </field>
     </record>
 
