@@ -240,9 +240,10 @@ class PartnerInfoExtended(models.Model):
 		elif self.vat_type:
 			self.write({'l10n_co_document_type': self.change_vat_type_dos_nit(self)})
 		#if self.l10n_co_document_type is not "false":
-		if self.l10n_co_document_type is False:
-			msg = _('¡Error! Elija un tipo de identificación')
-			raise exceptions.ValidationError(msg)
+		if self:
+			if self.l10n_co_document_type is False:
+				msg = _('¡Error! Elija un tipo de identificación')
+				raise exceptions.ValidationError(msg)
 
 	def change_vat_type_nit(self, partner):
 		if partner.l10n_co_document_type == 'rut':
