@@ -7,7 +7,7 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
 
-    def update_vat(self):
+    '''def update_vat(self):
         partners = self.env['res.partner'].search([('vat_num', '=', False), ('vat', '!=', False)])
         for partner in partners:
             if partner.vat and not partner.vat_num and partner.l10n_co_document_type:
@@ -17,7 +17,15 @@ class ResPartner(models.Model):
                     if partner.l10n_co_document_type == 'rut':
                         dv = partner.calcular_dv(numero)
                         vals['vat_vd'] = dv
-                    partner.write(vals)
+                    partner.write(vals)'''
+
+    def update_vat(self):
+        partners = self.env['res.partner'].search([('active', '=', True)])
+        for partner in partners:
+            if partner.l10n_co_document_type:
+                partner.write({'vat_type': partner.change_vat_type(partner)})
+            elif partner.vat_num:
+                partner.write({'l10n_co_document_type': partner.change_vat_type_dos(partner)})
 
 
     def GetNitCompany(self, number):
@@ -49,6 +57,28 @@ class ResPartner(models.Model):
             return  '11'
         elif partner.l10n_co_document_type == 'national_citizen_id':
             return  '13'
+
+    def change_vat_type_dos(self, partner):
+        if partner.vat_type == '31':
+            return  'rut'
+        elif partner.vat_type == '13':
+            return  'id_document'
+        elif partner.vat_type == '12':
+            return  'id_card'
+        elif partner.vat_type == '41':
+            return  'passport'
+        elif partner.vat_type == '22':
+            return 'foreign_id_card'
+        elif partner.vat_type == '':
+            return  ''
+        elif partner.vat_type == '':
+            return  ''
+        elif partner.vat_type == '':
+            return  ''
+        elif partner.vat_type == '11':
+            return  'civil_registration'
+        elif partner.vat_type == '13':
+            return  'national_citizen_id'
 
 
 
