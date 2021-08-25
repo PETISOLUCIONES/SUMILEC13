@@ -82,13 +82,9 @@ class AccountMove(models.Model):
     def _default_payment_method(self):
         return self.env['dian.paymentmethod'].search([('code', '=', '1')], limit=1).id
 
-    def _default_payment_mean(self):
-        return self.env['dian.paymentmean'].search([('code', '=', '1')], limit=1).id
-
-
     payment_method_id = fields.Many2one("dian.paymentmethod", string='Método de pago', default=_default_payment_method)
 
-    payment_mean_id = fields.Many2one('dian.paymentmean', string='Forma de pago', default=_default_payment_mean)
+    payment_mean_id = fields.Many2one('dian.paymentmean', string='Forma de pago')
     description_code_credit = fields.Many2one("dian.creditnoteconcept", string='Concepto Nota de Credito')
     description_code_debit = fields.Many2one("dian.debitnoteconcept", string='Concepto Nota de Débito')
     debit_note = fields.Boolean(string='Nota débito', related='journal_id.debit_note')
@@ -129,16 +125,8 @@ class AccountMove(models.Model):
     def action_post1(self):
 
         file = 'plantilla.xml'
-        if self.env.company.ruta_plantilla:
-            ruta_plantilla = self.env.company.ruta_plantilla +'/' +file
-        else:
-            ruta_plantilla = file
-        full_file = os.path.abspath(os.path.join('', ruta_plantilla))
-        try:
-            doc_xml = ET.parse(full_file)
-        except:
-            raise UserError("No se encontró la plantilla en la ruta " + full_file)
-
+        full_file = os.path.abspath(os.path.join('', file))
+        doc_xml = ET.parse(full_file)
 
         root = doc_xml.getroot()
         total_descuento = 0
@@ -281,7 +269,8 @@ class AccountMove(models.Model):
                 DateCalculationRate_c = '0'
                 Resolution_str = move.journal_id.sequence_id.resolution_id.resolution_resolution
                 ResolutionPrefix = move.journal_id.sequence_id.prefix
-                ResolutionDateInvoice = move.journal_id.sequence_id.resolution_id.resolution_resolution_date.strftime('%Y-%m-%d')
+                ResolutionDateInvoice = move.journal_id.sequence_id.resolution_id.resolution_resolution_date.strftime(
+                    '%Y-%m-%d')
                 ResolutionDateFrom = move.journal_id.sequence_id.resolution_id.resolution_date_from.strftime('%Y-%m-%d')
                 ResolutionDateTo = move.journal_id.sequence_id.resolution_id.resolution_date_to.strftime('%Y-%m-%d')
                 ResolutionRankFrom = str(move.journal_id.sequence_id.resolution_id.resolution_from)
@@ -494,7 +483,7 @@ class AccountMove(models.Model):
                                 MiscCodeDescription='Descuento',
                                 PercentAmt=str(((-1 * descuento) * 100) / totalLinea),
                                 MiscType='1', )
-                datos.append(dato)
+                    datos.append(dato)
                 i = i + 1
             self.GenerarLineasInvcMisc(datos, root)
 
@@ -560,23 +549,18 @@ class AccountMove(models.Model):
             move.EditaNodos('COOneTime', datos, root)
 
         directorio = "Facturacion/ArchivosXML/" + nit_company + "/"
-        #directoriozip = "Facturacion/Zip/" + nit_company + "/"
-
-
-        if self.env.company.ruta_plantilla:
-            ruta_xml = self.env.company.ruta_plantilla + "/ArchivosXML/" + nit_company + "/"
-        else:
-            ruta_xml = directorio
+        directoriozip = "Facturacion/Zip/" + nit_company + "/"
 
         try:
-            os.stat(ruta_xml)
-            #os.stat(directoriozip)
+            os.stat(directorio)
+            os.stat(directoriozip)
         except:
-            os.makedirs(ruta_xml)
-            #os.makedirs(directoriozip)
+            os.makedirs(directorio)
+            os.makedirs(directoriozip)
 
-        new_file = ruta_xml + move.name + '.xml'
+        new_file = directorio + move.name + '.xml'
 
+        # new_file = directorio + 'P126.xml'
         doc_xml.write(new_file)
         for move in self:
             ip_ws = str(move.company_id.ip_webservice)
@@ -596,13 +580,12 @@ class AccountMove(models.Model):
         body = open(new_file, "r").read()
 
         responsews = requests.post(url, data=body.encode('utf-8'), headers=headers)
-
+        respuesta = eval(responsews.content.decode('utf-8'))
         tipodato = type(responsews)
         resultados = ""
         attach = ""
         respuestaws = ""
         if responsews.status_code == 200:
-            respuesta = eval(responsews.content.decode('utf-8'))
             if 'Respuesta' in respuesta:
                 resultados = respuesta['Respuesta']
                 attach = self.GetAttach(resultados)
@@ -881,16 +864,11 @@ class AccountMove(models.Model):
 
     def GetNitCompany(self, number):
         document = ''
-        try:
-            if '-' in number:
-                document = number[0:number.find('-')]
-            else:
-                document = number
-            return document
-        except:
-            return document
-
-
+        if '-' in number:
+            document = number[0:number.find('-')]
+        else:
+            document = number
+        return document
 
     def TypeDocumentCust(self, typedocument):
         type = ''
@@ -960,7 +938,6 @@ class Company(models.Model):
     software_id = fields.Char(string='ID del software')
     # city_id = fields.Many2one('res.city', string='Ciudad')
     ip_webservice = fields.Char(string='IP WebService')
-    ruta_plantilla = fields.Char(string='Ruta Plantilla')
 
 
 class ResCity(models.Model):
