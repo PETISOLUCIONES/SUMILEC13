@@ -252,7 +252,7 @@ class sale_order(models.Model):
         return base_url
 
     def send_mail_approve_credit_limit(self):
-        manager_group_id = self.env['ir.model.data'].get_object_reference('sales_team', 'group_sale_manager')[1]
+        manager_group_id = self.env['ir.model.data'].get_object_reference('dev_customer_credit_limit', 'credit_limit_config')[1]
         browse_group = self.env['res.groups'].browse(manager_group_id)
         partner_id = self.partner_id
         if self.partner_id.parent_id:
