@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/dev_customer_credit_limit.iml" filepath="$PROJECT_DIR$/.idea/dev_customer_credit_limit.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../sales_config/.idea/sales_config.iml" filepath="$PROJECT_DIR$/../sales_config/.idea/sales_config.iml" />
     </modules>
   </component>
 </project>
