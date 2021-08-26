@@ -16,7 +16,8 @@
                     <field name="seller_name"/>
                 </xpath>
                 <xpath expr="//field[@name='origin']" position="after">
-                    <field name="purchase_id"  />
+                    <field name="purchase_id" attrs="{'invisible': [('purchase_id','=', False)]}" />
+                    <field name="sale_id"  attrs="{'invisible': [('sale_id','=', False)]}" />
                     <field name="currency_id" invisible="True" />
                     <!--<field name="estado_so"/>-->
                     <field name="total_orden"/>

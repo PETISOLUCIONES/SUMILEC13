@@ -13,6 +13,7 @@ class StockPicking(models.Model):
     seller_name = fields.Char(related='partner_id.user_id.name', string='Vendedor', readonly=True, store=True)
     partner_nit = fields.Char(related='partner_id.vat', string='NIT', readonly=True, store=True)
     purchase_id = fields.Many2one('purchase.order', related='move_lines.purchase_line_id.order_id', string='Pedidos de compra', readonly=True)
+    sale_id = fields.Many2one('sale.order', related='group_id.sale_id', string='Pedidos de venta', readonly=True)
     '''estado_so = fields.Selection(	[['draft', 'Cotizacion'],
                                       ['sent', 'Cotizacion Enviada'],
                                       ['credit_limit', 'Limite de Credito'],
