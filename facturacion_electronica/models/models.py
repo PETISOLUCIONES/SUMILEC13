@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import base64
 
+import math
 from odoo import models, fields, api
+from odoo.tools.float_utils import float_round
 from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
 import xml.etree.ElementTree as ET
 import os
@@ -174,6 +176,7 @@ class AccountMove(models.Model):
         impuestosFactura = []
         impuestosFactura.append("IVA")
 
+
         for move in self:
             for line in move.invoice_line_ids:
                 total_descuento = total_descuento + ((line.discount / 100) * line.price_unit * line.quantity)
@@ -187,8 +190,9 @@ class AccountMove(models.Model):
                 subtotal = subtotal + line_price_subtotal
                 for tax in line.tax_ids:
                     if tax.type_tax.name == 'IVA':
-                        total_impuestos = total_impuestos + ((tax.amount / 100) * ((line.price_unit * line.quantity) - (
-                                (line.discount / 100) * line.price_unit * line.quantity)))
+                        '''total_impuestos = total_impuestos + ((tax.amount / 100) * ((line.price_unit * line.quantity) - (
+                                (line.discount / 100) * line.price_unit * line.quantity)))'''
+                        total_impuestos += (tax.amount / 100) * line.price_subtotal
                     elif tax.type_tax.name == 'ReteIVA' or tax.type_tax.name == 'ReteFuente' or tax.type_tax.name == 'ReteICA':
                         total_retenciones = total_retenciones + ((tax.amount / 100) * (
                                 (line.price_unit * line.quantity) - (
@@ -369,7 +373,7 @@ class AccountMove(models.Model):
                          DateCalculationRate_c=DateCalculationRate_c,
                          ConditionPay='0',
                          DspDocSubTotal=str(round(subtotal, 2)),
-                         DocTaxAmt=str(round(total_impuestos, 2)),
+                         DocTaxAmt=str(round(float_round(total_impuestos, precision_digits=2, rounding_method='UP'),2)),
                          DspDocInvoiceAmt=str(round(total, 2)),
                          Discount=str(round(total_descuento, 2)))
         move.EditaNodos('InvcHead', datos, root)
@@ -415,7 +419,8 @@ class AccountMove(models.Model):
             i = 1
             for line in move.invoice_line_ids:
                 price_unit_wo_discount = line.price_unit * (1 - (line.discount / 100.0))
-                line_price_subtotal = line.quantity * price_unit_wo_discount
+                #line_price_subtotal = line.quantity * price_unit_wo_discount
+                line_price_subtotal = line.price_subtotal
                 if line_price_subtotal > 0 and not line.name in producto_regalo:
                     if len(line.tax_ids) == 0:
                         dato = dict(Company=nit_company,
@@ -438,8 +443,9 @@ class AccountMove(models.Model):
                                         CurrencyCode=CurrencyCode,
                                         RateCode=tax.type_tax.name,
                                         DocTaxableAmt=str(round(line_price_subtotal, 2)),
-                                        TaxAmt=str(round(abs(line_price_subtotal * tax.amount / 100), 2)),
-                                        DocTaxAmt=str(round(abs(line_price_subtotal * tax.amount / 100), 2)),
+                                        TaxAmt = str(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2)),
+                                        #TaxAmt=str(round(line_price_subtotal * tax.amount / 100, 2)),
+                                        DocTaxAmt=str(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2)),
                                         Percent=(str("{0:.2f}".format(abs(tax.amount)))),
                                         WithholdingTax_c=str(tax.type_tax.retention))
                             datos.append(dato)
