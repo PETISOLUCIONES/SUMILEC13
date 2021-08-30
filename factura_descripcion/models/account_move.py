@@ -64,6 +64,7 @@ class AccountMove(models.Model):
                             linea.x_studio_costo * linea.quantity)
             record.x_studio_costo_total = total_costo
 
+    @api.depends('x_studio_rentabilidad')
     def _compute_studio_rentabilidad_por(self):
         for record in self:
             if record.amount_untaxed > 0:
@@ -72,6 +73,8 @@ class AccountMove(models.Model):
                         record.x_studio_rentabilidad_por = (record.x_studio_rentabilidad * 100) / record.x_studio_base_imponible_cop
                 else:
                     record.x_studio_rentabilidad_por = (record.x_studio_rentabilidad * 100) / record.amount_untaxed
+            else:
+                record.x_studio_rentabilidad_por = 0
 
     @api.depends('amount_untaxed')
     def _compute_base_imponible_cop(self):
