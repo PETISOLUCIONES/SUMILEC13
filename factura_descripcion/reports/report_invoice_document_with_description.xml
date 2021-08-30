@@ -5,10 +5,18 @@
 
             <xpath expr="//p[@name='payment_term']" position="after">
                 <p t-if="o.payments" name="payment_difference_description">
-                    <p t-if="o.payments[-1].payment_difference_handling == 'reconcile' and o.payments[-1].move_line_ids">
+
+                    <t t-set="reason" t-value="" />
+                    <tr t-foreach="o.payments" t-as="payment">
+                        <t t-if="payment.payment_difference_handling == 'reconcile' and payment.move_line_ids">
+                            <t t-set="reason" t-value="payment.move_line_ids[-1].name" />
+                        </t>
+                    </tr>
+                    <p t-if="reason">
                         Descripción de diferencia de pago:
-                        <span t-field="o.payments[-1].move_line_ids[-1].name"/>
+                        <span t-esc="reason"/>
                     </p>
+
                 </p>
             </xpath>
 

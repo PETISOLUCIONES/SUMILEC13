@@ -22,6 +22,9 @@
 
     # always loaded
     'data': [
+        'views/view_move_form_rentability.xml',
         'reports/report_invoice_document_with_description.xml',
+        'reports/report_payment_receipt_document_with_journal_items.xml',
+        'reports/product_template_form_view_rentability.xml',
     ],
 }
