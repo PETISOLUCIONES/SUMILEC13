@@ -17,6 +17,7 @@ class AccountMove(models.Model):
         string="Rentabilidad",
         readonly=True,
         compute="_compute_rentabilidad",
+        store=True,
     )
 
     x_studio_costo_total = fields.Monetary(
@@ -48,6 +49,7 @@ class AccountMove(models.Model):
         for record in self:
             record.payments = self.env['account.payment'].search([('invoice_ids', 'in', record.id)]).sorted(key=lambda r: r.id)
 
+    @api.depends('x_studio_costo_total')
     def _compute_rentabilidad(self):
         for record in self:
             total_rentabilidad = 0
