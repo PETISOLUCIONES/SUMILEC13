@@ -443,9 +443,9 @@ class AccountMove(models.Model):
                                         CurrencyCode=CurrencyCode,
                                         RateCode=tax.type_tax.name,
                                         DocTaxableAmt=str(round(line_price_subtotal, 2)),
-                                        TaxAmt = str(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2)),
+                                        TaxAmt = str(abs(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2))),
                                         #TaxAmt=str(round(line_price_subtotal * tax.amount / 100, 2)),
-                                        DocTaxAmt=str(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2)),
+                                        DocTaxAmt=str(abs(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2))),
                                         Percent=(str("{0:.2f}".format(abs(tax.amount)))),
                                         WithholdingTax_c=str(tax.type_tax.retention))
                             datos.append(dato)
