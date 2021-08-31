@@ -341,6 +341,7 @@ class AccountMove(models.Model):
                          DueDate=move.invoice_date_due.strftime('%d/%m/%Y') + ' ' + datetime.now().strftime('%H:%M:%S'),
                          DocWHTaxAmt=str(round(abs(total_retenciones), 2)),
                          InvoiceComment=comment,
+                         InvoiceComment2=move.invoice_user_id.name,
                          CurrencyCode=move.partner_id.currency_id.name,
                          CurrencyCodeCurrencyID=move.partner_id.currency_id.name,
                          ContingencyInvoice='0',
