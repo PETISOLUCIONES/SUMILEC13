@@ -179,24 +179,25 @@ class AccountMove(models.Model):
 
         for move in self:
             for line in move.invoice_line_ids:
-                total_descuento = total_descuento + ((line.discount / 100) * line.price_unit * line.quantity)
-                if line.price_unit < 0:
-                    total_descuento = total_descuento + (-1 * line.price_unit)
-                    # subtotal = subtotal + (-1 * line.price_unit)
+                if line.display_type != 'line_section' and line.display_type != 'line_note':
+                    total_descuento = total_descuento + ((line.discount / 100) * line.price_unit * line.quantity)
+                    if line.price_unit < 0:
+                        total_descuento = total_descuento + (-1 * line.price_unit)
+                        # subtotal = subtotal + (-1 * line.price_unit)
 
-                price_unit_wo_discount = line.price_unit * (1 - (line.discount / 100.0))
-                line_price_subtotal = line.quantity * price_unit_wo_discount
+                    price_unit_wo_discount = line.price_unit * (1 - (line.discount / 100.0))
+                    line_price_subtotal = line.quantity * price_unit_wo_discount
 
-                subtotal = subtotal + line_price_subtotal
-                for tax in line.tax_ids:
-                    if tax.type_tax.name == 'IVA':
-                        '''total_impuestos = total_impuestos + ((tax.amount / 100) * ((line.price_unit * line.quantity) - (
-                                (line.discount / 100) * line.price_unit * line.quantity)))'''
-                        total_impuestos += (tax.amount / 100) * line.price_subtotal
-                    elif tax.type_tax.name == 'ReteIVA' or tax.type_tax.name == 'ReteFuente' or tax.type_tax.name == 'ReteICA':
-                        total_retenciones = total_retenciones + ((tax.amount / 100) * (
-                                (line.price_unit * line.quantity) - (
-                                (line.discount / 100) * line.price_unit * line.quantity)))
+                    subtotal = subtotal + line_price_subtotal
+                    for tax in line.tax_ids:
+                        if tax.type_tax.name == 'IVA':
+                            '''total_impuestos = total_impuestos + ((tax.amount / 100) * ((line.price_unit * line.quantity) - (
+                                    (line.discount / 100) * line.price_unit * line.quantity)))'''
+                            total_impuestos += (tax.amount / 100) * line.price_subtotal
+                        elif tax.type_tax.name == 'ReteIVA' or tax.type_tax.name == 'ReteFuente' or tax.type_tax.name == 'ReteICA':
+                            total_retenciones = total_retenciones + ((tax.amount / 100) * (
+                                    (line.price_unit * line.quantity) - (
+                                    (line.discount / 100) * line.price_unit * line.quantity)))
             total = subtotal + total_impuestos
 
             FiscalResposability_c = self.GetResponsibilities(move.company_id.fiscal_responsibility_ids)
@@ -385,31 +386,32 @@ class AccountMove(models.Model):
             CurrencyCode = move.partner_id.currency_id.name
             i = 1
             for line in move.invoice_line_ids:
-                if line.price_unit > 0:
-                    dato = dict(InvoiceNum=InvoiceNum,
-                                InvoiceLine=str(i),
-                                PartNum=line.product_id.default_code,
-                                LineDesc=line.name,
-                                PartNumPartDescription=line.name,
-                                SellingShipQty=str(line.quantity),
-                                SalesUM=line.product_uom_id.name,
-                                UnitPrice=str(round(line.price_unit, 2)),
-                                DocUnitPrice=str(round(line.price_unit, 2)),
-                                DocExtPrice=str(round(line.price_unit * line.quantity, 2)),
-                                DspDocExtPrice=str(round(line.price_unit * line.quantity, 2)),
-                                DiscountPercent=str(line.discount),
-                                Discount=str(round(line.price_unit * line.quantity * (line.discount / 100), 2)),
-                                DocDiscount='0',
-                                DspDocLessDiscount=str(round(line.price_unit * line.quantity * (line.discount / 100), 2)),
-                                DspDocTotalMiscChrg='0',
-                                CurrencyCode=CurrencyCode)
-                    datos.append(dato)
-                    i = i + 1
-                else:
-                    try:
-                        producto_regalo.append(line.name.split("-")[1].lstrip())
-                    except:
-                        producto_regalo.append(line.name.split(":")[1].lstrip())
+                if line.display_type != 'line_section' and line.display_type != 'line_note':
+                    if line.price_unit > 0:
+                        dato = dict(InvoiceNum=InvoiceNum,
+                                    InvoiceLine=str(i),
+                                    PartNum=line.product_id.default_code,
+                                    LineDesc=line.name,
+                                    PartNumPartDescription=line.name,
+                                    SellingShipQty=str(line.quantity),
+                                    SalesUM=line.product_uom_id.name,
+                                    UnitPrice=str(round(line.price_unit, 2)),
+                                    DocUnitPrice=str(round(line.price_unit, 2)),
+                                    DocExtPrice=str(round(line.price_unit * line.quantity, 2)),
+                                    DspDocExtPrice=str(round(line.price_unit * line.quantity, 2)),
+                                    DiscountPercent=str(line.discount),
+                                    Discount=str(round(line.price_unit * line.quantity * (line.discount / 100), 2)),
+                                    DocDiscount='0',
+                                    DspDocLessDiscount=str(round(line.price_unit * line.quantity * (line.discount / 100), 2)),
+                                    DspDocTotalMiscChrg='0',
+                                    CurrencyCode=CurrencyCode)
+                        datos.append(dato)
+                        i = i + 1
+                    else:
+                        try:
+                            producto_regalo.append(line.name.split("-")[1].lstrip())
+                        except:
+                            producto_regalo.append(line.name.split(":")[1].lstrip())
 
             self.GenerarLineasFact(datos, root)
 
@@ -419,39 +421,40 @@ class AccountMove(models.Model):
             CurrencyCode = move.partner_id.currency_id.name
             i = 1
             for line in move.invoice_line_ids:
-                price_unit_wo_discount = line.price_unit * (1 - (line.discount / 100.0))
-                #line_price_subtotal = line.quantity * price_unit_wo_discount
-                line_price_subtotal = line.price_subtotal
-                if line_price_subtotal > 0 and not line.name in producto_regalo:
-                    if len(line.tax_ids) == 0:
-                        dato = dict(Company=nit_company,
-                                    InvoiceNum=InvoiceNum,
-                                    InvoiceLine=str(i),
-                                    CurrencyCode=CurrencyCode,
-                                    RateCode="IVA",
-                                    DocTaxableAmt=str(round(line_price_subtotal, 2)),
-                                    TaxAmt="0",
-                                    DocTaxAmt="0",
-                                    Percent="0",
-                                    WithholdingTax_c="False")
-                        datos.append(dato)
-                    else:
-                        for tax in line.tax_ids:
-                            impuestosFactura.append(tax.type_tax.name)
+                if line.display_type != 'line_section' and line.display_type != 'line_note':
+                    price_unit_wo_discount = line.price_unit * (1 - (line.discount / 100.0))
+                    #line_price_subtotal = line.quantity * price_unit_wo_discount
+                    line_price_subtotal = line.price_subtotal
+                    if line_price_subtotal > 0 and not line.name in producto_regalo:
+                        if len(line.tax_ids) == 0:
                             dato = dict(Company=nit_company,
                                         InvoiceNum=InvoiceNum,
                                         InvoiceLine=str(i),
                                         CurrencyCode=CurrencyCode,
-                                        RateCode=tax.type_tax.name,
+                                        RateCode="IVA",
                                         DocTaxableAmt=str(round(line_price_subtotal, 2)),
-                                        TaxAmt = str(abs(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2))),
-                                        #TaxAmt=str(round(line_price_subtotal * tax.amount / 100, 2)),
-                                        DocTaxAmt=str(abs(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2))),
-                                        Percent=(str("{0:.2f}".format(abs(tax.amount)))),
-                                        WithholdingTax_c=str(tax.type_tax.retention))
+                                        TaxAmt="0",
+                                        DocTaxAmt="0",
+                                        Percent="0",
+                                        WithholdingTax_c="False")
                             datos.append(dato)
+                        else:
+                            for tax in line.tax_ids:
+                                impuestosFactura.append(tax.type_tax.name)
+                                dato = dict(Company=nit_company,
+                                            InvoiceNum=InvoiceNum,
+                                            InvoiceLine=str(i),
+                                            CurrencyCode=CurrencyCode,
+                                            RateCode=tax.type_tax.name,
+                                            DocTaxableAmt=str(round(line_price_subtotal, 2)),
+                                            TaxAmt = str(abs(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2))),
+                                            #TaxAmt=str(round(line_price_subtotal * tax.amount / 100, 2)),
+                                            DocTaxAmt=str(abs(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2))),
+                                            Percent=(str("{0:.2f}".format(abs(tax.amount)))),
+                                            WithholdingTax_c=str(tax.type_tax.retention))
+                                datos.append(dato)
 
-                i = i + 1
+                    i = i + 1
             self.GenerarLineasInvcTaxs(datos, root)
 
         for move in self:
@@ -460,49 +463,51 @@ class AccountMove(models.Model):
             CurrencyCode = move.partner_id.currency_id.name
             i = 1
             for line in move.invoice_line_ids:
-                if line.price_unit > 0:
-                    dato = dict(Company=nit_company,
-                                InvoiceNum=InvoiceNum,
-                                InvoiceLine=str(i),
-                                MiscCode='0',
-                                Description='Descuento',
-                                MiscAmt=str(round(line.quantity * line.price_unit * (line.discount / 100), 2)),
-                                DocMiscAmt='0',
-                                MiscCodeDescription='Descuento',
-                                PercentAmt=str(line.discount),
-                                MiscType='1', )
+                if line.display_type != 'line_section' and line.display_type != 'line_note':
+                    if line.price_unit > 0:
+                        dato = dict(Company=nit_company,
+                                    InvoiceNum=InvoiceNum,
+                                    InvoiceLine=str(i),
+                                    MiscCode='0',
+                                    Description='Descuento',
+                                    MiscAmt=str(round(line.quantity * line.price_unit * (line.discount / 100), 2)),
+                                    DocMiscAmt='0',
+                                    MiscCodeDescription='Descuento',
+                                    PercentAmt=str(line.discount),
+                                    MiscType='1', )
 
-                else:
-                    pos = 0
-                    totalLinea = 0
-                    descuento = line.quantity * line.price_unit
-                    for move in self:
-                        indice = 1
-                        if pos > 0:
-                            break
-                        for line in move.invoice_line_ids:
-                            if line.name in producto_regalo:
-                                totalLinea = line.quantity * line.price_unit
-                                pos = indice
-                                break
-                            indice = indice + 1
-
-                    if totalLinea == 0:
+                    else:
                         pos = 0
-                        totalLinea = 1
+                        totalLinea = 0
+                        descuento = line.quantity * line.price_unit
+                        for move in self:
+                            indice = 1
+                            if pos > 0:
+                                break
+                            for line in move.invoice_line_ids:
+                                if line.display_type != 'line_section' and line.display_type != 'line_note':
+                                    if line.name in producto_regalo:
+                                        totalLinea = line.quantity * line.price_unit
+                                        pos = indice
+                                        break
+                                    indice = indice + 1
 
-                    dato = dict(Company=nit_company,
-                                InvoiceNum=InvoiceNum,
-                                InvoiceLine=str(pos),
-                                MiscCode='0',
-                                Description='Descuento',
-                                MiscAmt=str(round(-1 * descuento, 2)),
-                                DocMiscAmt='0',
-                                MiscCodeDescription='Descuento',
-                                PercentAmt=str(((-1 * descuento) * 100) / totalLinea),
-                                MiscType='1', )
-                datos.append(dato)
-                i = i + 1
+                        if totalLinea == 0:
+                            pos = 0
+                            totalLinea = 1
+
+                        dato = dict(Company=nit_company,
+                                    InvoiceNum=InvoiceNum,
+                                    InvoiceLine=str(pos),
+                                    MiscCode='0',
+                                    Description='Descuento',
+                                    MiscAmt=str(round(-1 * descuento, 2)),
+                                    DocMiscAmt='0',
+                                    MiscCodeDescription='Descuento',
+                                    PercentAmt=str(((-1 * descuento) * 100) / totalLinea),
+                                    MiscType='1', )
+                    datos.append(dato)
+                    i = i + 1
             self.GenerarLineasInvcMisc(datos, root)
 
         for move in self:
