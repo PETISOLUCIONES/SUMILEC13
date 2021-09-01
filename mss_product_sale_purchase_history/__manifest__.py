@@ -31,7 +31,16 @@
     "author": "Maurya Software Solutions",
     'website': 'www.maurysolutions.com',
     'category': 'product',
-    'depends': ['base', 'product','purchase','sale','mss_product_master'],
+    'depends': [
+        'base',
+        'product',
+        'purchase',
+        'sale',
+        'stock',
+        'purchase_discount',
+        'mai_so_lot_multi_quantity',
+        'mss_product_master'
+    ],
     'data': [
         'views/product_sale_purchase_history_view.xml',
     ],
