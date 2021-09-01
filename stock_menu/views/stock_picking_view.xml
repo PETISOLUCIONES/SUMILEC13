@@ -15,6 +15,9 @@
                 <xpath expr="//field[@name='picking_type_id']" position="after">
                     <field name="seller_name"/>
                 </xpath>
+                <xpath expr="//button[@name='action_show_details']" position="replace">
+                    <button name="action_show_details" string="Register lots, packs, location" type="object" icon="fa-list" width="0.1" attrs="{'invisible': [('show_details_visible', '=', False), ('picking_code', '!=', 'outgoing')]}" options="{&quot;warn&quot;: true}"/>
+                </xpath>
                 <xpath expr="//field[@name='origin']" position="after">
                     <field name="purchase_id" attrs="{'invisible': [('purchase_id','=', False)]}" />
                     <field name="sale_id"  attrs="{'invisible': [('sale_id','=', False)]}" />
