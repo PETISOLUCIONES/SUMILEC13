@@ -21,6 +21,7 @@
 ##############################################################################
 
 from odoo import models, fields
+from odoo.exceptions import UserError
 
 
 class AccountMove(models.Model):
@@ -30,13 +31,10 @@ class AccountMove(models.Model):
     cr_total = fields.Monetary(string="Haber", default=0.0, compute="total_debit_credit")
 
     def total_debit_credit(self):
-        #res = {}
         for move in self:
             dr_total = 0.0
             cr_total = 0.0
             for line in move.line_ids:
                 dr_total += line.debit
                 cr_total += line.credit
-            #res.update({'cr_total': cr_total, 'dr_total': dr_total})
-        #return res
-        self.dr_total, self.cr_total = dr_total, cr_total
+            move.dr_total, move.cr_total = dr_total, cr_total
