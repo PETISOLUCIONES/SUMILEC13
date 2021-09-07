@@ -923,7 +923,7 @@ class AccountMove(models.Model):
         elif typedocument == 'foreign_id_card':
             type = '22'
         elif typedocument == 'external_id':
-            type = '50'
+            type = ''
         elif typedocument == 'diplomatic_card':
             type = ''
         elif typedocument == 'residence_document':
@@ -932,8 +932,6 @@ class AccountMove(models.Model):
             type = '11'
         elif typedocument == 'national_citizen_id':
             type = '13'
-        elif typedocument == 'niup_id':
-            type = '91'
         return type
 
     def GetResponseWS(self, response):

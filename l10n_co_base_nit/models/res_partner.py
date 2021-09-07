@@ -36,7 +36,9 @@ class ResPartner(models.Model):
         ('31', u'31 - NIT (Número de identificación tributaria)'),
         ('41', u'41 - Pasaporte'),
         ('42', u'42 - Documento de identificación extranjero'),
-        ('43', u'43 - Sin identificación del exterior o para uso definido por la DIAN')
+        ('43', u'43 - Sin identificación del exterior o para uso definido por la DIAN'),
+        ('50', u'50 - NIT de otro pais'),
+        ('91', u'91 - NUIP')
     ], string='VAT type',
         help='''Customer identifier, according to types given by the DIAN.
                 If it is a natural person and has RUT use NIT''',
@@ -217,7 +219,7 @@ class ResPartner(models.Model):
         elif self.l10n_co_document_type == 'foreign_id_card':
             self.vat_type = '22'
         elif self.l10n_co_document_type == 'external_id':
-            self.vat_type = ''
+            self.vat_type = '50'
         elif self.l10n_co_document_type == 'diplomatic_card':
             self.vat_type = ''
         elif self.l10n_co_document_type == 'residence_document':
@@ -226,4 +228,6 @@ class ResPartner(models.Model):
             self.vat_type = '11'
         elif self.l10n_co_document_type == 'national_citizen_id':
             self.vat_type = '13'
+        elif self.l10n_co_document_type == 'niup_id':
+            self.vat_type = '91'
 
