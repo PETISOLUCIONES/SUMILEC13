@@ -200,16 +200,20 @@ class AccountMove(models.Model):
                                     (line.discount / 100) * line.price_unit * line.quantity)))
             total = subtotal + total_impuestos
 
-            FiscalResposability_c = self.GetResponsibilities(move.company_id.fiscal_responsibility_ids)
-            nit_company = self.GetNitCompany(move.company_id.vat)
-            CustNum = self.GetNitCompany(move.partner_id.vat)
-            invoicetype = self.GetInvoiceType(move)
-            CustID = self.TypeDocumentCust(move.partner_id.l10n_co_document_type)
-            comment = self.narration
+            FiscalResposability_c = move.GetResponsibilities(move.company_id.fiscal_responsibility_ids)
+            nit_company = move.GetNitCompany(move.company_id.vat)
+            CustNum = move.GetNitCompany(move.partner_id.vat)
+            invoicetype = move.GetInvoiceType(move)
+            CustID = move.TypeDocumentCust(move.partner_id.l10n_co_document_type)
+            comment = move.narration
+            '''orders = move.env['sale.order'].search([('invoice_ids', 'in', [move.id] )])
+            for order in orders:
+                if order.note:
+                    comment += '\n ' + order.note'''
 
             if invoicetype == '91':
                 InvoiceRef = move.reversed_entry_id.name
-                InvoiceTypeRef =  self.GetInvoiceType(move.reversed_entry_id)
+                InvoiceTypeRef =  move.GetInvoiceType(move.reversed_entry_id)
                 InvoiceDateRef = move.reversed_entry_id.invoice_date.strftime('%d/%m/%Y %H:%M:%S')
                 DueDateRef = move.reversed_entry_id.invoice_date_due.strftime('%d/%m/%Y %H:%M:%S')
                 CMReasonCode_c = move.description_code_credit.code
@@ -233,7 +237,7 @@ class AccountMove(models.Model):
 
             elif invoicetype == '92':
                 InvoiceRef = move.debit_origin_id.name
-                InvoiceTypeRef =  self.GetInvoiceType(move.debit_origin_id)
+                InvoiceTypeRef =  move.GetInvoiceType(move.debit_origin_id)
                 InvoiceDateRef = move.debit_origin_id.invoice_date.strftime('%d/%m/%Y')
                 DueDateRef = move.debit_origin_id.invoice_date_due.strftime('%d/%m/%Y')
                 CMReasonCode_c = '0'
@@ -378,7 +382,7 @@ class AccountMove(models.Model):
                          DocTaxAmt=str(round(float_round(total_impuestos, precision_digits=2, rounding_method='UP'),2)),
                          DspDocInvoiceAmt=str(round(total, 2)),
                          Discount=str(round(total_descuento, 2)))
-        move.EditaNodos('InvcHead', datos, root)
+        self.EditaNodos('InvcHead', datos, root)
 
         for move in self:
             datos = []
@@ -413,7 +417,7 @@ class AccountMove(models.Model):
                         except:
                             producto_regalo.append(line.name.split(":")[1].lstrip())
 
-            self.GenerarLineasFact(datos, root)
+            move.GenerarLineasFact(datos, root)
 
         for move in self:
             datos = []
@@ -571,124 +575,126 @@ class AccountMove(models.Model):
 
             move.EditaNodos('COOneTime', datos, root)
 
-        directorio = "Facturacion/ArchivosXML/" + nit_company + "/"
-        #directoriozip = "Facturacion/Zip/" + nit_company + "/"
-
-
-        if self.env.company.ruta_plantilla:
-            ruta_xml = self.env.company.ruta_plantilla + "/ArchivosXML/" + nit_company + "/"
-        else:
-            ruta_xml = directorio
-
-        try:
-            os.stat(ruta_xml)
-            #os.stat(directoriozip)
-        except:
-            os.makedirs(ruta_xml)
-            #os.makedirs(directoriozip)
-
-        new_file = ruta_xml + move.name + '.xml'
-
-        doc_xml.write(new_file)
         for move in self:
+
+            directorio = "Facturacion/ArchivosXML/" + nit_company + "/"
+            #directoriozip = "Facturacion/Zip/" + nit_company + "/"
+
+
+            if move.env.company.ruta_plantilla:
+                ruta_xml = move.env.company.ruta_plantilla + "/ArchivosXML/" + nit_company + "/"
+            else:
+                ruta_xml = directorio
+
+            try:
+                os.stat(ruta_xml)
+                #os.stat(directoriozip)
+            except:
+                os.makedirs(ruta_xml)
+                #os.makedirs(directoriozip)
+
+            new_file = ruta_xml + move.name + '.xml'
+
+            doc_xml.write(new_file)
+
             ip_ws = str(move.company_id.ip_webservice)
-        url = ''
-        if invoicetype == '01':
-            url = 'http://' + ip_ws + '/api/EnvioFactura'
-            # url = 'http://localhost:57780/api/EnvioFactura'
-        elif invoicetype == '02':
-            url = 'http://' + ip_ws + '/api/EnvioFacturaExportacion'
-        elif invoicetype == '91':
-            url = 'http://' + ip_ws + '/api/EnvioNotaCredito'
-        else:
-            url = 'http://' + ip_ws + '/api/EnvioNotaDebito'
-
-        headers = {'content-type': 'text/xml;charset=utf-8'}
-
-        body = open(new_file, "r").read()
-
-        responsews = requests.post(url, data=body.encode('utf-8'), headers=headers)
-
-        tipodato = type(responsews)
-        resultados = ""
-        attach = ""
-        respuestaws = ""
-        if responsews.status_code == 200:
-            respuesta = eval(responsews.content.decode('utf-8'))
-            if 'Respuesta' in respuesta:
-                resultados = respuesta['Respuesta']
-                attach = self.GetAttach(resultados)
-                respuestaws = self.GetResponseWS(resultados)
-
-            estado_factura = ''
-            if respuestaws == 'PROCESADO_CORRECTAMENTE':
-                estado_factura = 'Exitoso'
-
-                url_xml = 'http://' + ip_ws + '/AttachedDocuments/' + str(
-                    nit_company) + '/' + attach
-                url_pdf = 'http://' + ip_ws + '/facturaPDF/' + str(
-                    nit_company) + '/' + self.name + '.pdf'
-
-                url_zip = 'http://'+ ip_ws + '/zip/' + attach[0:len(attach) - 4].replace('ad', 'z') + '.zip'
-
-                #my_xml = requests.get(url_xml).content
-                #my_pdf = requests.get(url_pdf).content
-                my_zip_file = requests.get(url_zip).content
-
+            url = ''
+            if invoicetype == '01':
+                url = 'http://' + ip_ws + '/api/EnvioFactura'
+                # url = 'http://localhost:57780/api/EnvioFactura'
+            elif invoicetype == '02':
+                url = 'http://' + ip_ws + '/api/EnvioFacturaExportacion'
+            elif invoicetype == '91':
+                url = 'http://' + ip_ws + '/api/EnvioNotaCredito'
             else:
-                estado_factura = 'Fallida'
+                url = 'http://' + ip_ws + '/api/EnvioNotaDebito'
 
+            headers = {'content-type': 'text/xml;charset=utf-8'}
 
+            body = open(new_file, "r").read()
 
-            if estado_factura == 'Exitoso':
-                return (self.env['ir.attachment'].create({
-                    'name': attach[0:len(attach) - 4] + ".zip",
-                    'type': 'binary',
-                    'res_id': self.id,
-                    'res_model': 'account.move',
-                    'datas': base64.b64encode(my_zip_file),
-                    'mimetype': 'application/zip'
-                }), self.write({
-                    'url_pdf': url_pdf,
-                    'url_xml': url_xml,
-                    'description_status_dian': respuestaws,
-                    'invoice_status_dian': estado_factura
-                }))
-            else:
-                if respuestaws == 'Factura ya aprobada':
+            responsews = requests.post(url, data=body.encode('utf-8'), headers=headers)
+
+            tipodato = type(responsews)
+            resultados = ""
+            attach = ""
+            respuestaws = ""
+            if responsews.status_code == 200:
+                respuesta = eval(responsews.content.decode('utf-8'))
+                if 'Respuesta' in respuesta:
+                    resultados = respuesta['Respuesta']
+                    attach = move.GetAttach(resultados)
+                    respuestaws = move.GetResponseWS(resultados)
+
+                estado_factura = ''
+                if respuestaws == 'PROCESADO_CORRECTAMENTE':
+                    estado_factura = 'Exitoso'
+
                     url_xml = 'http://' + ip_ws + '/AttachedDocuments/' + str(
                         nit_company) + '/' + attach
                     url_pdf = 'http://' + ip_ws + '/facturaPDF/' + str(
-                        nit_company) + '/' + self.name + '.pdf'
+                        nit_company) + '/' + move.name + '.pdf'
 
-                    url_zip = 'http://' + ip_ws + '/zip/' + attach[0:len(attach) - 4].replace('ad', 'z') + '.zip'
+                    url_zip = 'http://'+ ip_ws + '/zip/' + attach[0:len(attach) - 4].replace('ad', 'z') + '.zip'
 
                     #my_xml = requests.get(url_xml).content
                     #my_pdf = requests.get(url_pdf).content
                     my_zip_file = requests.get(url_zip).content
 
+                else:
+                    estado_factura = 'Fallida'
 
-                    return (self.env['ir.attachment'].create({
+
+
+                if estado_factura == 'Exitoso':
+                    return (move.env['ir.attachment'].create({
                         'name': attach[0:len(attach) - 4] + ".zip",
                         'type': 'binary',
-                        'res_id': self.id,
+                        'res_id': move.id,
                         'res_model': 'account.move',
                         'datas': base64.b64encode(my_zip_file),
                         'mimetype': 'application/zip'
-                    }), self.write({
+                    }), move.write({
                         'url_pdf': url_pdf,
                         'url_xml': url_xml,
-                        'description_status_dian': 'PROCESADO_CORRECTAMENTE',
-                        'invoice_status_dian': 'Exitoso'
-                    }))
-
-                else:
-                    return (self.write({
                         'description_status_dian': respuestaws,
                         'invoice_status_dian': estado_factura
                     }))
-        elif responsews.status_code == 500:
-            raise UserError("Error en la conexión al Web service")
+                else:
+                    if respuestaws == 'Factura ya aprobada':
+                        url_xml = 'http://' + ip_ws + '/AttachedDocuments/' + str(
+                            nit_company) + '/' + attach
+                        url_pdf = 'http://' + ip_ws + '/facturaPDF/' + str(
+                            nit_company) + '/' + move.name + '.pdf'
+
+                        url_zip = 'http://' + ip_ws + '/zip/' + attach[0:len(attach) - 4].replace('ad', 'z') + '.zip'
+
+                        #my_xml = requests.get(url_xml).content
+                        #my_pdf = requests.get(url_pdf).content
+                        my_zip_file = requests.get(url_zip).content
+
+
+                        return (move.env['ir.attachment'].create({
+                            'name': attach[0:len(attach) - 4] + ".zip",
+                            'type': 'binary',
+                            'res_id': move.id,
+                            'res_model': 'account.move',
+                            'datas': base64.b64encode(my_zip_file),
+                            'mimetype': 'application/zip'
+                        }), move.write({
+                            'url_pdf': url_pdf,
+                            'url_xml': url_xml,
+                            'description_status_dian': 'PROCESADO_CORRECTAMENTE',
+                            'invoice_status_dian': 'Exitoso'
+                        }))
+
+                    else:
+                        return (move.write({
+                            'description_status_dian': respuestaws,
+                            'invoice_status_dian': estado_factura
+                        }))
+            elif responsews.status_code == 500:
+                raise UserError("Error en la conexión al Web service")
 
         # raise UserError(respuesta)
 
@@ -917,7 +923,7 @@ class AccountMove(models.Model):
         elif typedocument == 'foreign_id_card':
             type = '22'
         elif typedocument == 'external_id':
-            type = ''
+            type = '50'
         elif typedocument == 'diplomatic_card':
             type = ''
         elif typedocument == 'residence_document':
@@ -926,6 +932,8 @@ class AccountMove(models.Model):
             type = '11'
         elif typedocument == 'national_citizen_id':
             type = '13'
+        elif typedocument == 'niup_id':
+            type = '91'
         return type
 
     def GetResponseWS(self, response):
