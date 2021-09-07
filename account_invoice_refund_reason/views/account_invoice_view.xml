@@ -1,0 +1,28 @@
+<odoo>
+    <record id="extended_account_view_move_form" model="ir.ui.view">
+        <field name="name">extended.account.view.move.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="reason_id" attrs="{'invisible': [('reason_id', '=', False)]}" readonly="1"/>
+            </xpath>
+            <!--
+            <xpath expr="//page[@name='other_info']/group/group[1]/field[@name='name']" position="attributes">
+                <attribute name="attrs">{'invisible': [('type','in', ['in_refund', 'out_refund'])]}</attribute>
+            </xpath>
+            -->
+        </field>
+    </record>
+
+    <record id="extended_account_invoice_view_tree" model="ir.ui.view">
+            <field name="name">extended.account.invoice.view.tree</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_invoice_tree"/>
+            <field name="arch" type="xml">
+                <field name="invoice_origin" position="after">
+                    <field name="reason_id"/>
+                </field>
+            </field>
+        </record>
+</odoo>
