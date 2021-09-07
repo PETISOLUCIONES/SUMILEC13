@@ -257,7 +257,7 @@ class PartnerInfoExtended(models.Model):
 		elif partner.l10n_co_document_type == 'foreign_id_card':
 			return '22'
 		elif partner.l10n_co_document_type == 'external_id':
-			return ''
+			return '50'
 		elif partner.l10n_co_document_type == 'diplomatic_card':
 			return ''
 		elif partner.l10n_co_document_type == 'residence_document':
@@ -266,6 +266,8 @@ class PartnerInfoExtended(models.Model):
 			return '11'
 		elif partner.l10n_co_document_type == 'national_citizen_id':
 			return '13'
+		elif partner.l10n_co_document_type == 'niup_id':
+			return '91'
 
 	def change_vat_type_dos_nit(self, partner):
 		if partner.vat_type == '31':
@@ -278,10 +280,10 @@ class PartnerInfoExtended(models.Model):
 			return 'passport'
 		elif partner.vat_type == '22':
 			return 'foreign_id_card'
-		elif partner.vat_type == '':
-			return ''
-		elif partner.vat_type == '':
-			return ''
+		elif partner.vat_type == '50':
+			return 'external_id'
+		elif partner.vat_type == '91':
+			return 'niup_id'
 		elif partner.vat_type == '':
 			return ''
 		elif partner.vat_type == '11':
