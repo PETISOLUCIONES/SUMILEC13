@@ -87,6 +87,7 @@
       <DspDocLessDiscount></DspDocLessDiscount>
       <DspDocTotalMiscChrg></DspDocTotalMiscChrg>
       <CurrencyCode></CurrencyCode>
+      <LineComment></LineComment>
     </InvcDtl>
   </InvcDtls>
   <InvcTaxs>

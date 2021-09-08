@@ -409,7 +409,8 @@ class AccountMove(models.Model):
                                     DocDiscount='0',
                                     DspDocLessDiscount=str(round(line.price_unit * line.quantity * (line.discount / 100), 2)),
                                     DspDocTotalMiscChrg='0',
-                                    CurrencyCode=CurrencyCode)
+                                    CurrencyCode=CurrencyCode,
+                                    LineComment=line.product_id.categ_id.name)
                         datos.append(dato)
                         i = i + 1
                     else:
@@ -750,6 +751,7 @@ class AccountMove(models.Model):
                     DspDocLessDiscount = ET.SubElement(InvcDtl, 'DspDocLessDiscount')
                     DspDocTotalMiscChrg = ET.SubElement(InvcDtl, 'DspDocTotalMiscChrg')
                     CurrencyCode = ET.SubElement(InvcDtl, 'CurrencyCode')
+                    LineComment = ET.SubElement(InvcDtl, 'LineComment')
                     i += 1
 
             detalles = root.findall('./InvcDtls/')
