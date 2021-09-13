@@ -14,17 +14,19 @@ class ResPartner(models.Model):
                                                       toolbar=toolbar,
                                                       submenu=submenu)
         user_id = self.env.user.id
-        access_partner = True
-        sale_user_id = self.env['ir.model.data'].get_object_reference('sales_team', 'group_sale_salesman')[1]
-        sales_all_user_id = self.env['ir.model.data'].get_object_reference('sales_team', 'group_sale_salesman_all_leads')[1]
-        stock_user_id = self.env['ir.model.data'].get_object_reference('stock', 'group_stock_user')[1]
+        access_partner = False
+        user_master_id = self.env['ir.model.data'].get_object_reference('permisos_super', 'user_master')[1]
+        user_partner_id = self.env['ir.model.data'].get_object_reference('permisos_super', 'access_contacts')[1]
+        #sale_user_id = self.env['ir.model.data'].get_object_reference('sales_team', 'group_sale_salesman')[1]
+        #sales_all_user_id = self.env['ir.model.data'].get_object_reference('sales_team', 'group_sale_salesman_all_leads')[1]
+        #stock_user_id = self.env['ir.model.data'].get_object_reference('stock', 'group_stock_user')[1]
         browse_group = self.env['res.groups'].search(
-            [('id', 'in', [sale_user_id, sales_all_user_id, stock_user_id])])
+            [('id', 'in', [user_master_id, user_partner_id])])
         list_user = []
         for user in browse_group.users:
             list_user.append(user.id)
         if user_id in list_user:
-            access_partner = False
+            access_partner = True
 
         if not access_partner:
             if view_type == 'form':

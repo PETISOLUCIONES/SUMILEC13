@@ -15,11 +15,10 @@ class ProductTemplate(models.Model):
         user_id = self.env.user.id
         access_product = False
         user_master_id = self.env['ir.model.data'].get_object_reference('permisos_super', 'user_master')[1]
-        group_purchase_user_id = self.env['ir.model.data'].get_object_reference('purchase', 'group_purchase_user')[1]
-        group_purchase_manager_id = \
-            self.env['ir.model.data'].get_object_reference('purchase', 'group_purchase_manager')[1]
-        browse_group = self.env['res.groups'].search(
-            [('id', 'in', [user_master_id, group_purchase_user_id, group_purchase_manager_id])])
+        user_product_id = self.env['ir.model.data'].get_object_reference('permisos_super', 'access_products')[1]
+        #group_purchase_user_id = self.env['ir.model.data'].get_object_reference('purchase', 'group_purchase_user')[1]
+        #group_purchase_manager_id = self.env['ir.model.data'].get_object_reference('purchase', 'group_purchase_manager')[1]
+        browse_group = self.env['res.groups'].search([('id', 'in', [user_master_id, user_product_id])])
         list_user = []
         for user in browse_group.users:
             list_user.append(user.id)
@@ -45,18 +44,6 @@ class ProductTemplate(models.Model):
             res['arch'] = etree.tostring(doc)
         return res
 
-    def actualizar_costo(self):
-        user_id = self.env.user.id
-        access_product = False
-        user_master_id = self.env['ir.model.data'].get_object_reference('permisos_super', 'user_master')[1]
-        browse_group = self.env['res.groups'].search(
-            [('id', '=', user_master_id)])
-        list_user = []
-        for user in browse_group.users:
-            list_user.append(user.id)
-        if user_id in list_user:
-            access_product = True
-        return access_product
 
 
 class ProductProduct(models.Model):
@@ -71,11 +58,10 @@ class ProductProduct(models.Model):
         user_id = self.env.user.id
         access_product = False
         user_master_id = self.env['ir.model.data'].get_object_reference('permisos_super', 'user_master')[1]
-        group_purchase_user_id = self.env['ir.model.data'].get_object_reference('purchase', 'group_purchase_user')[1]
-        group_purchase_manager_id = \
-        self.env['ir.model.data'].get_object_reference('purchase', 'group_purchase_manager')[1]
-        browse_group = self.env['res.groups'].search(
-            [('id', 'in', [user_master_id, group_purchase_user_id, group_purchase_manager_id])])
+        user_product_id = self.env['ir.model.data'].get_object_reference('permisos_super', 'access_products')[1]
+        #group_purchase_user_id = self.env['ir.model.data'].get_object_reference('purchase', 'group_purchase_user')[1]
+        #group_purchase_manager_id = self.env['ir.model.data'].get_object_reference('purchase', 'group_purchase_manager')[1]
+        browse_group = self.env['res.groups'].search([('id', 'in', [user_master_id, user_product_id])])
         list_user = []
         for user in browse_group.users:
             list_user.append(user.id)
@@ -100,19 +86,6 @@ class ProductProduct(models.Model):
                 node.set('create', 'false')
             res['arch'] = etree.tostring(doc)
         return res
-
-    def actualizar_costo(self):
-        user_id = self.env.user.id
-        access_product = False
-        user_master_id = self.env['ir.model.data'].get_object_reference('permisos_super', 'user_master')[1]
-        browse_group = self.env['res.groups'].search(
-            [('id', 'in', [user_master_id])])
-        list_user = []
-        for user in browse_group.users:
-            list_user.append(user.id)
-        if user_id in list_user:
-            access_product = True
-        return access_product
 
 
 class StockChangeStandardPrice(models.TransientModel):
@@ -165,8 +138,10 @@ class PurchaseOrder(models.Model):
         access_invoice = False
         user_master_id = self.env['ir.model.data'].get_object_reference('permisos_super', 'user_master')[1]
         group_account_manager_id = self.env['ir.model.data'].get_object_reference('account', 'group_account_manager')[1]
+        group_account_user_manager_id = self.env['ir.model.data'].get_object_reference('account', 'group_account_invoice')[1]
+        group_account_user_id = self.env['ir.model.data'].get_object_reference('account', 'group_account_user')[1]
         browse_group = self.env['res.groups'].search(
-            [('id', 'in', [user_master_id, group_account_manager_id])])
+            [('id', 'in', [user_master_id, group_account_manager_id, group_account_user_manager_id, group_account_user_id])])
         list_user = []
         for user in browse_group.users:
             list_user.append(user.id)
@@ -202,8 +177,10 @@ class SaleOrder(models.Model):
         access_invoice = False
         user_master_id = self.env['ir.model.data'].get_object_reference('permisos_super', 'user_master')[1]
         group_account_manager_id = self.env['ir.model.data'].get_object_reference('account', 'group_account_manager')[1]
+        group_account_user_manager_id = self.env['ir.model.data'].get_object_reference('account', 'group_account_invoice')[1]
+        group_account_user_id = self.env['ir.model.data'].get_object_reference('account', 'group_account_user')[1]
         browse_group = self.env['res.groups'].search(
-            [('id', 'in', [user_master_id, group_account_manager_id])])
+            [('id', 'in', [user_master_id, group_account_manager_id, group_account_user_manager_id, group_account_user_id])])
         list_user = []
         for user in browse_group.users:
             list_user.append(user.id)

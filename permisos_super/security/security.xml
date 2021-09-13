@@ -5,4 +5,14 @@
         <field name="name">Usuario Master</field>
         <field name="users" eval="[(4, ref('base.user_root'))]"/>
     </record>
+
+    <record id="access_products" model="res.groups">
+        <field name="name">Acceso productos</field>
+        <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
+
+    <record id="access_contacts" model="res.groups">
+        <field name="name">Acceso contactos</field>
+        <field name="users" eval="[(4, ref('base.user_root'))]"/>
+    </record>
 </odoo>
