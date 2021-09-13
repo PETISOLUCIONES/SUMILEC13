@@ -5,14 +5,17 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//form/header/button[4]" position="attributes">
-                <attribute name="groups">account.group_account_manager</attribute>
-            </xpath>
-            <!--<xpath expr="//form/header/button[3]" position="attributes">
-                <attribute name="groups">account.group_account_manager</attribute>
+            <!--<xpath expr="//form/header/button[4]" position="attributes">
+                <attribute name="groups">account.group_account_manager, permisos_super.user_master</attribute>
             </xpath>-->
             <xpath expr="//tree//field[@name='product_id']" position="attributes">
-                <attribute name="options">{'no_create_edit': True, 'no_create':True}</attribute>
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+            <xpath expr="//tree//field[@name='purchase_price']" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
             </xpath>
         </field>
     </record>
@@ -25,45 +28,36 @@
             <xpath expr="//tree//field[@name='product_id']" position="attributes">
                 <attribute name="options">{'no_create_edit': True, 'no_create':True}</attribute>
             </xpath>
-        </field>
-    </record>
-
-
-
-      <record id="view_sale_order_permisos_form" model="ir.ui.view">
-        <field name="name">view.sale.order.permisos.form</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale_margin.sale_margin_sale_order_line_form"/>
-        <field name="arch" type="xml">
-            <!--<xpath expr="//field[@name='purchase_price']" position="after">
-                <field name="able_to_modify_product"/>
-            </xpath>-->
-            <xpath expr="//field[@name='purchase_price']" position="attributes">
-                <attribute name="groups">permisos_super.user_master</attribute>
-                <!--<attribute name="invisible">1</attribute>-->
+            <!--<xpath expr="//form/header/button[11]" position="attributes">
+                <attribute name="groups">account.group_account_manager, permisos_super.user_master</attribute>
             </xpath>
-            <!--<xpath expr="//field[@name='purchase_price']" position="after">
-                <field name="purchase_price_com"/>
+            <xpath expr="//form/header/button[6]" position="attributes">
+                <attribute name="groups">account.group_account_manager, permisos_super.user_master</attribute>
             </xpath>-->
-
-        </field>
-    </record>
-
-
-      <record model="ir.ui.view" id="sale_margin_sale_order_line_permisos">
-        <field name="name">sale.order.line.margin.view.form.permisos</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale_margin.sale_margin_sale_order_line"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='purchase_price']" position="attributes">
-                <attribute name="groups">permisos_super.user_master</attribute>
-                <!--<attribute name="invisible">1</attribute>-->
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
             </xpath>
-            <!--<xpath expr="//field[@name='purchase_price']" position="after">
-                <field name="purchase_price_com"/>
-            </xpath>-->
         </field>
     </record>
+
+
+
+
+ <record id="view_stock_permisos_form" model="ir.ui.view">
+        <field name="name">view.stock.permisos.form</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree//field[@name='product_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+             <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+
 
 
 
@@ -77,6 +71,10 @@
             </xpath>
         </field>
     </record>
+
+
+
+
 
 
   </data>

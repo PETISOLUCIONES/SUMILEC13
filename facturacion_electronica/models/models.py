@@ -380,7 +380,7 @@ class AccountMove(models.Model):
                          DateCalculationRate_c=DateCalculationRate_c,
                          ConditionPay='0',
                          DspDocSubTotal=str(round(subtotal, 2)),
-                         DocTaxAmt=str(round(float_round(total_impuestos, precision_digits=2, rounding_method='UP'),2)),
+                         DocTaxAmt=str(round(float_round(total_impuestos, precision_digits=2),2)),
                          DspDocInvoiceAmt=str(round(total, 2)),
                          Discount=str(round(total_descuento, 2)))
         self.EditaNodos('InvcHead', datos, root)
@@ -453,9 +453,8 @@ class AccountMove(models.Model):
                                             CurrencyCode=CurrencyCode,
                                             RateCode=tax.type_tax.name,
                                             DocTaxableAmt=str(round(line_price_subtotal, 2)),
-                                            TaxAmt = str(abs(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2))),
-                                            #TaxAmt=str(round(line_price_subtotal * tax.amount / 100, 2)),
-                                            DocTaxAmt=str(abs(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2, rounding_method='UP'),2))),
+                                            TaxAmt=str(abs(round(float_round(line_price_subtotal * tax.amount / 100,  precision_digits=2),2))),
+                                            DocTaxAmt=str(abs(round(float_round(line_price_subtotal * tax.amount / 100, precision_digits=2),2))),
                                             Percent=(str("{0:.2f}".format(abs(tax.amount)))),
                                             WithholdingTax_c=str(tax.type_tax.retention))
                                 datos.append(dato)

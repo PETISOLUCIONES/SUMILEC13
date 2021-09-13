@@ -26,6 +26,7 @@
     <InvoiceComment1></InvoiceComment1>
     <InvoiceComment2></InvoiceComment2>
     <InvoiceComment3></InvoiceComment3>
+    <InvoiceComment4></InvoiceComment4>
     <CurrencyCode></CurrencyCode>
     <CurrencyCodeCurrencyID></CurrencyCodeCurrencyID>
     <ContingencyInvoice></ContingencyInvoice>
@@ -88,6 +89,9 @@
       <DspDocTotalMiscChrg></DspDocTotalMiscChrg>
       <CurrencyCode></CurrencyCode>
       <LineComment></LineComment>
+      <LineComment1></LineComment1>
+      <LineComment2></LineComment2>
+      <LineComment3></LineComment3>
     </InvcDtl>
   </InvcDtls>
   <InvcTaxs>
@@ -180,4 +184,10 @@
     <CountryName></CountryName>
     <CountryCode></CountryCode>
   </COOneTime>
+  <Attachements>
+    <InvcAttached>
+      <Attached></Attached>
+      <name></name>
+    </InvcAttached>
+  </Attachements>
 </EDocument>
