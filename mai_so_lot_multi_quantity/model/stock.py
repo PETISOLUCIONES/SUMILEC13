@@ -7,15 +7,14 @@ class StockMove(models.Model):
     lot_ids = fields.Many2many('stock.production.lot', string="Crate", copy=False)
     assign_lot = fields.Boolean(string='Assign Lot')
 
-
-    def create_stock_move_line(self,lista_lotes):
+    def create_stock_move_line(self, lista_lotes):
         parcial = False
         en_cero = False
         for move in self:
 
             if move.move_line_ids:
                 if move.sale_line_id and move.sale_line_id.lot_ids:
-                    #asignar los lotes desde las S0
+                    # asignar los lotes desde las S0
                     move.move_line_ids.unlink()
                     monto_total = move.product_uom_qty
                     for lot_id in move.sale_line_id.lot_ids:
@@ -31,19 +30,19 @@ class StockMove(models.Model):
                             monto_reservar = monto_total
                         if monto_reservar > 0:
                             vals = {
-                                    'move_id': move.id,
-                                    'product_id': move.product_id.id,
-                                    'product_uom_id': move.product_uom.id,
-                                    'location_id': move.location_id.id,
-                                    'location_dest_id': move.location_dest_id.id,
-                                    'picking_id': move.picking_id.id,
-                                    'lot_id':lot_id.id,
-                                    'state':'assigned',
-                                    'product_uom_qty':monto_reservar
-                                    }
+                                'move_id': move.id,
+                                'product_id': move.product_id.id,
+                                'product_uom_id': move.product_uom.id,
+                                'location_id': move.location_id.id,
+                                'location_dest_id': move.location_dest_id.id,
+                                'picking_id': move.picking_id.id,
+                                'lot_id': lot_id.id,
+                                'state': 'assigned',
+                                'product_uom_qty': monto_reservar
+                            }
                             self.env['stock.move.line'].create(vals)
                             quants = move.env['stock.quant']._update_reserved_quantity(
-                                move.product_id, move.location_id, monto_reservar, lot_id=lot_id, strict=True)
+                                move.product_id, move.location_id, monto_reservar, lot_id=lot_id, strict=False)
 
                 else:
                     move.move_line_ids.unlink()
@@ -60,7 +59,7 @@ class StockMove(models.Model):
                                 monto_total = monto_total - monto_reservar
                             else:
                                 monto_reservar = monto_total
-                            if monto_reservar>0:
+                            if monto_reservar > 0:
                                 vals = {
                                     'move_id': move.id,
                                     'product_id': move.product_id.id,
@@ -74,14 +73,12 @@ class StockMove(models.Model):
                                 }
                                 self.env['stock.move.line'].create(vals)
                                 quants = move.env['stock.quant']._update_reserved_quantity(
-                                    move.product_id, move.location_id, monto_reservar, lot_id=l, strict=True)
-
-
+                                    move.product_id, move.location_id, monto_reservar, lot_id=l, strict=False)
 
             if move.product_uom_qty != move.reserved_availability:
                 parcial = True
         if parcial:
-            #verificar todos en cero
+            # verificar todos en cero
             todos = True
             for move in self:
                 if move.reserved_availability != 0:
@@ -99,20 +96,19 @@ class StockMove(models.Model):
 
         for move in self:
             for l in move.move_line_ids:
-                 if l.lot_id:
-                     lista_lotes.append(l.lot_id)
+                if l.lot_id:
+                    lista_lotes.append(l.lot_id)
 
         res = super(StockMove, self)._action_assign()
         for move in self:
             if move.move_line_ids:
                 if move.sale_line_id and move.sale_line_id.lot_ids:
                     move.create_stock_move_line(lista_lotes)
-                    #if not move.assign_lot:
+                    # if not move.assign_lot:
                 else:
                     if len(lista_lotes) > 0:
                         move.create_stock_move_line(lista_lotes)
         return res
-
 
     '''def create_stock_move_line(self):
         for move in self:
@@ -160,4 +156,3 @@ class StockMove(models.Model):
             if move.assign_lot:
                 move.assign_lot = False
         return res'''
-
