@@ -39,7 +39,7 @@ class AccountMoveLine(models.Model):
                 record[("x_studio_rentabilidad")] = rentability
             else:
                 if record.move_id.currency_id.name == 'USD':
-                    cop = self.env['res.currency.rate'].search([('currency_id.id', '=', 8), ('name', '=', record.move_id.date_invoice)])
+                    cop = self.env['res.currency.rate'].search([('currency_id.id', '=', 8), ('name', '=', record.move_id.invoice_date)])
                     if cop:
                         record[("x_studio_rentabilidad")] = (record.x_studio_pu_con_descuento * cop.rate) - record.x_studio_costo
                     else:
