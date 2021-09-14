@@ -90,7 +90,7 @@ class AccountMove(models.Model):
     def _compute_trm(self):
         for record in self:
             if record.currency_id.name == 'USD':
-                cop = self.env['res.currency.rate'].search([('currency_id.id', '=', 8), ('name', '=', record.date_invoice)])
+                cop = self.env['res.currency.rate'].search([('currency_id.id', '=', 8), ('name', '=', record.invoice_date)])
                 if cop:
                     record.x_studio_trm = cop.rate
                 else:
