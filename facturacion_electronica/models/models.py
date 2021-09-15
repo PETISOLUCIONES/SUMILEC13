@@ -25,6 +25,12 @@ class MoveReversal(models.TransientModel):
 
     concept_note_credit_id = fields.Many2one("dian.creditnoteconcept", string="Concepto")
 
+    def _prepare_default_reversal(self, move):
+        res = super(MoveReversal, self)._prepare_default_reversal(move)
+        res['description_code_credit'] = self.concept_note_credit_id.id
+        return res
+
+
 
 class ConceptNoteDebit(models.Model):
     _name = 'dian.debitnoteconcept'
