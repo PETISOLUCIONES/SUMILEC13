@@ -40,20 +40,21 @@ class StockPicking(models.Model):
                                ["No aplica para flete","No aplica para flete"],
                                ["Terminado","Terminado"],
                                ["Espera de Formulario","Espera de Formulario"],
-                               ["En espera de fecha de confirmación de despacho","En espera de fecha de confirmación de despacho"]], string='Estado de alistamiento', track_visibility='onchange')
+                               ["En espera de fecha de confirmación de despacho","En espera de fecha de confirmación de despacho"]], string='Estado de alistamiento', track_visibility='onchange', copy=False)
     empresa_transpostadora = fields.Selection([["Servientrega","Servientrega"],
                                                ["coordinadora","Coordinadora"],
                                                ["Envía","Envía"],
                                                ["Transprensa","Transprensa"],
                                                ["Transporte Propio","Transporte Propio"],
                                                ["Trasportado o recogido por el cliente","Transportado o Recogido por el cliente"],
-                                               ["Otro","Otro"]], string='Tipo de transporte', track_visibility='onchange')
-    unidades = fields.Float(string='Unidades')
-    peso_kg = fields.Float(string='Peso (Kg)')
-    volumen = fields.Float(string='Volumen')
-    fecha_hora_envio = fields.Datetime(string='Fecha y Hora de Envio', track_visibility='onchange')
-    numero_guia = fields.Char(string='Numero de guia', track_visibility='onchange')
-    empacado_por = fields.Char(string='Empacado Por', track_visibility='onchange')
+                                               ["Otro","Otro"]],
+                                              string='Tipo de transporte', track_visibility='onchange', copy=False)
+    unidades = fields.Float(string='Unidades', copy=False)
+    peso_kg = fields.Float(string='Peso (Kg)', copy=False)
+    volumen = fields.Float(string='Volumen', copy=False)
+    fecha_hora_envio = fields.Datetime(string='Fecha y Hora de Envio', track_visibility='onchange', copy=False)
+    numero_guia = fields.Char(string='Numero de guia', track_visibility='onchange', copy=False)
+    empacado_por = fields.Char(string='Empacado Por', track_visibility='onchange', copy=False)
     total_productos = fields.Monetary(string='Total Productos', compute='_get_total_productos')
     mano_obra = fields.Monetary(string='Mano de obra')
     total_produccion = fields.Monetary(string='Total Produccion', compute='_get_total_production')
@@ -89,14 +90,14 @@ class StockPicking(models.Model):
                         total += venta.price_total
             record['total_su'] = total
 
-    @api.model
+    '''@api.model
     def create(self, vals):
         if 'backorder_id' in vals:
             data = [vals.pop(key, None) for key in ['empresa_transpostadora', 'unidades',
                                               'peso_kg', 'volumen',
                                               'fecha_hora_envio', 'numero_guia',
                                               'empacado_por']]
-        return super(StockPicking, self).create(vals)
+        return super(StockPicking, self).create(vals)'''
 
 class StockMove(models.Model):
     _inherit = 'stock.move'

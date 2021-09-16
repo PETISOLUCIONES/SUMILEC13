@@ -12,5 +12,11 @@
                     <span t-field="ml.category_id.name"/><br/>
                 </td>
               </xpath>
+                <xpath expr="//div[@name='div_sched_date']" position="after">
+                <div class="col-auto" name="div_vendedor">
+                    <strong>Vendedor:</strong>
+                    <p t-field="o.seller_name"/>
+                </div>
+              </xpath>
         </template>
 </odoo>
