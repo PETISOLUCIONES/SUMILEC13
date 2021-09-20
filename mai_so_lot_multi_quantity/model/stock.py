@@ -70,7 +70,7 @@ class StockMove(models.Model):
                                 monto_reservar = monto_total
                             if monto_reservar > 0:
                                 quants = move.env['stock.quant']._gather(move.product_id, move.location_id,
-                                                                         lot_id=lot_id, strict=False)
+                                                                         lot_id=l, strict=False)
 
                                 for quant in quants:
                                     disponible = quant.quantity - quant.reserved_quantity
