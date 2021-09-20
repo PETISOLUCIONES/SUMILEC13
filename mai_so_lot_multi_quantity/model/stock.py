@@ -1,4 +1,5 @@
 from odoo import api, fields, models, _
+from odoo.tools.float_utils import float_compare, float_round, float_is_zero
 
 
 class StockMove(models.Model):
@@ -10,6 +11,7 @@ class StockMove(models.Model):
     def create_stock_move_line(self, lista_lotes):
         parcial = False
         en_cero = False
+        rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         for move in self:
 
             if move.move_line_ids:
@@ -29,20 +31,27 @@ class StockMove(models.Model):
                         else:
                             monto_reservar = monto_total
                         if monto_reservar > 0:
-                            vals = {
-                                'move_id': move.id,
-                                'product_id': move.product_id.id,
-                                'product_uom_id': move.product_uom.id,
-                                'location_id': move.location_id.id,
-                                'location_dest_id': move.location_dest_id.id,
-                                'picking_id': move.picking_id.id,
-                                'lot_id': lot_id.id,
-                                'state': 'assigned',
-                                'product_uom_qty': monto_reservar
-                            }
-                            self.env['stock.move.line'].create(vals)
-                            quants = move.env['stock.quant']._update_reserved_quantity(
-                                move.product_id, move.location_id, monto_reservar, lot_id=lot_id, strict=False)
+                            quants = move.env['stock.quant']._gather(move.product_id, move.location_id,
+                                                                     lot_id=lot_id, strict=False)
+
+                            for quant in quants:
+                                disponible = quant.quantity - quant.reserved_quantity
+                                if float_compare(disponible, monto_reservar, precision_digits=rounding) != -1:
+                                    vals = {
+                                        'move_id': move.id,
+                                        'product_id': move.product_id.id,
+                                        'product_uom_id': move.product_uom.id,
+                                        'location_id': quant.location_id.id,
+                                        'location_dest_id': move.location_dest_id.id,
+                                        'picking_id': move.picking_id.id,
+                                        'lot_id': lot_id.id,
+                                        'state': 'assigned',
+                                        'product_uom_qty': monto_reservar
+                                    }
+                                    self.env['stock.move.line'].create(vals)
+                                    quants = move.env['stock.quant']._update_reserved_quantity(
+                                        move.product_id, quant.location_id, monto_reservar, lot_id=lot_id, strict=True)
+                                    break
 
                 else:
                     move.move_line_ids.unlink()
@@ -60,20 +69,28 @@ class StockMove(models.Model):
                             else:
                                 monto_reservar = monto_total
                             if monto_reservar > 0:
-                                vals = {
-                                    'move_id': move.id,
-                                    'product_id': move.product_id.id,
-                                    'product_uom_id': move.product_uom.id,
-                                    'location_id': move.location_id.id,
-                                    'location_dest_id': move.location_dest_id.id,
-                                    'picking_id': move.picking_id.id,
-                                    'lot_id': l.id,
-                                    'state': 'assigned',
-                                    'product_uom_qty': monto_reservar
-                                }
-                                self.env['stock.move.line'].create(vals)
-                                quants = move.env['stock.quant']._update_reserved_quantity(
-                                    move.product_id, move.location_id, monto_reservar, lot_id=l, strict=False)
+                                quants = move.env['stock.quant']._gather(move.product_id, move.location_id,
+                                                                         lot_id=lot_id, strict=False)
+
+                                for quant in quants:
+                                    disponible = quant.quantity - quant.reserved_quantity
+                                    if float_compare(disponible, monto_reservar, precision_digits=rounding) != -1:
+                                        vals = {
+                                            'move_id': move.id,
+                                            'product_id': move.product_id.id,
+                                            'product_uom_id': move.product_uom.id,
+                                            'location_id': quant.location_id.id,
+                                            'location_dest_id': move.location_dest_id.id,
+                                            'picking_id': move.picking_id.id,
+                                            'lot_id': l.id,
+                                            'state': 'assigned',
+                                            'product_uom_qty': monto_reservar
+                                        }
+                                        self.env['stock.move.line'].create(vals)
+                                        quants = move.env['stock.quant']._update_reserved_quantity(
+                                            move.product_id, quant.location_id, monto_reservar, lot_id=l, strict=True)
+                                        break
+
 
             if move.product_uom_qty != move.reserved_availability:
                 parcial = True
