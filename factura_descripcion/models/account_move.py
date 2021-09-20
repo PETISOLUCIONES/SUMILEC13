@@ -18,18 +18,21 @@ class AccountMove(models.Model):
         readonly=True,
         compute="_compute_rentabilidad",
         store=True,
+        default=0.0
     )
 
     x_studio_costo_total = fields.Monetary(
         string="Costo Total",
         readonly=True,
-        compute="_compute_costo_total"
+        compute="_compute_costo_total",
+        default=0.0
     )
 
     x_studio_rentabilidad_por = fields.Float(
         string="Rentabilidad %",
         readonly=True,
-        compute="_compute_studio_rentabilidad_por"
+        compute="_compute_studio_rentabilidad_por",
+        default=0.0
     )
 
     x_studio_base_imponible_cop = fields.Monetary(
@@ -37,12 +40,14 @@ class AccountMove(models.Model):
         readonly=True,
         compute="_compute_base_imponible_cop",
         store=True,
+        default=0.0
     )
 
     x_studio_trm = fields.Monetary(
         string="TRM",
         readonly=True,
-        compute="_compute_trm"
+        compute="_compute_trm",
+        default=0.0
     )
 
     def _compute_payment_ids(self):
@@ -73,6 +78,8 @@ class AccountMove(models.Model):
                 if record.currency_id.name == 'USD':
                     if record.x_studio_base_imponible_cop > 0:
                         record.x_studio_rentabilidad_por = (record.x_studio_rentabilidad * 100) / record.x_studio_base_imponible_cop
+                    else:
+                        record.x_studio_rentabilidad_por = 0
                 else:
                     record.x_studio_rentabilidad_por = (record.x_studio_rentabilidad * 100) / record.amount_untaxed
             else:
