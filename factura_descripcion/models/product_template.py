@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from odoo.tools.float_utils import float_compare
 
 
 class ProductTemplate(models.Model):
@@ -21,6 +22,10 @@ class ProductTemplate(models.Model):
         store=True,
     )
 
+    x_minimo_rentabilidad = fields.Float(string='% Minimo Rentabilidad',  related="categ_id.x_studio_por_minimo_rentabilidad", readonly=True)
+
+
+
     @api.depends('list_price')
     def _compute_rentability(self):
         for record in self:
@@ -29,4 +34,5 @@ class ProductTemplate(models.Model):
     @api.depends('x_studio_rentabilidad')
     def _compute_rentaility_percentage(self):
         for record in self:
-            record.x_studio_porcentaje_rentabilidad = (record.x_studio_rentabilidad * 100) / record.list_price
+            if float_compare(record.list_price, 0.0, precision_rounding=record.uom_id.rounding) != 0:
+                record.x_studio_porcentaje_rentabilidad = (record.x_studio_rentabilidad * 100) / record.list_price
