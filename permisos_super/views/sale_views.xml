@@ -58,7 +58,89 @@
     </record>
 
 
+      <record id="view_crm_permisos_form" model="ir.ui.view">
+        <field name="name">view.crm.permisos.form</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+             <xpath expr="//form/sheet/group/group[1]//field[@name='partner_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+            <xpath expr="//form/sheet/group/group[2]//field[@name='partner_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+        </field>
+    </record>
 
+      <record id="view_crm_permisos_kanban" model="ir.ui.view">
+        <field name="name">view.crm.permisos.kanban</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.quick_create_opportunity_form"/>
+        <field name="arch" type="xml">
+             <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+      <record id="view_calendar_permisos_form" model="ir.ui.view">
+        <field name="name">view.calendar.permisos.form</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+             <xpath expr="//field[@name='partner_ids']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+      <record id="view_account_permisos_form" model="ir.ui.view">
+        <field name="name">view.account.permisos.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+             <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+      <record id="view_account_payment_permisos_form" model="ir.ui.view">
+        <field name="name">view.account.payment.permisos.form</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+             <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+      <record id="view_stock_scrap_permisos_form" model="ir.ui.view">
+        <field name="name">view.stock.scrap.permisos.form</field>
+        <field name="model">stock.scrap</field>
+        <field name="inherit_id" ref="stock.stock_scrap_form_view"/>
+        <field name="arch" type="xml">
+             <xpath expr="//field[@name='owner_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+
+      <record id="view_product_supplierinfo_permisos_form" model="ir.ui.view">
+        <field name="name">view.product.supplierinfo.permisos.form</field>
+        <field name="model">product.supplierinfo</field>
+        <field name="inherit_id" ref="product.product_supplierinfo_form_view"/>
+        <field name="arch" type="xml">
+             <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='product_tmpl_id']" position="attributes">
+                <attribute name="options">{'no_create_edit': True, 'no_create':True, 'no_open': True}</attribute>
+            </xpath>
+        </field>
+    </record>
 
 
       <record id="view_stock_quant_tree" model="ir.ui.view">

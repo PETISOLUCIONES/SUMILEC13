@@ -19,7 +19,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['sale', 'account', 'sale_margin'],
+    'depends': ['sale', 'calendar', 'account', 'sale_margin', 'purchase', 'crm'],
 
     # always loaded
     'data': [
