@@ -50,7 +50,7 @@ class StockMove(models.Model):
                                     }
                                     self.env['stock.move.line'].create(vals)
                                     quants = move.env['stock.quant']._update_reserved_quantity(
-                                        move.product_id, quant.location_id, monto_reservar, lot_id=lot_id, strict=True)
+                                        move.product_id, quant.location_id, monto_reservar, lot_id=lot_id, strict=False)
                                     break
 
                 else:
@@ -88,7 +88,7 @@ class StockMove(models.Model):
                                         }
                                         self.env['stock.move.line'].create(vals)
                                         quants = move.env['stock.quant']._update_reserved_quantity(
-                                            move.product_id, quant.location_id, monto_reservar, lot_id=l, strict=True)
+                                            move.product_id, quant.location_id, monto_reservar, lot_id=l, strict=False)
                                         break
 
 
