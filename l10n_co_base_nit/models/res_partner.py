@@ -93,7 +93,7 @@ class ResPartner(models.Model):
         else:
             self.vat = self.vat_num
 
-    @api.model
+    #@api.model
     def write(self, vals):
         res = super(ResPartner, self).write(vals)
         for record in self:

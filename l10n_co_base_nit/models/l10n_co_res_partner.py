@@ -224,7 +224,7 @@ class PartnerInfoExtended(models.Model):
 			if item.l10n_co_document_type is not "false":
 				if item.vat_num is not False and \
 						item.l10n_co_document_type != "foreign_id_card" and \
-						item.l10n_co_document_type != "passport":
+						item.l10n_co_document_type != "passport" and item.l10n_co_document_type != "external_id":
 					if re.match("^[0-9]+$", item.vat_num) is None:
 						msg = _('¡Error! El número de identificación solo puede tener números')
 						raise exceptions.ValidationError(msg)
