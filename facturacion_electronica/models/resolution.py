@@ -18,8 +18,8 @@ class Resolution(models.Model):
                                                 ("04", "Factura electrónica de Venta - tipo 04"),
                                                 ("91", "Nota Crédito"),
                                                 ("92", "Nota Débito"),
-                                                ("", "Factura de Venta (No electrónica)")],
-                                     string="Tipo de documento", default="01")
+                                                ("00", "Factura de Venta (No electrónica)")],
+                                     string="Tipo de documento", default="01", required=True)
     resolution_prefix = fields.Char(string="Prefijo")
     resolution_resolution = fields.Char(string="Resolución")
     resolution_resolution_date = fields.Date(string="Fecha de la resolución")
@@ -31,11 +31,13 @@ class Resolution(models.Model):
 
 
 
+
     def _compute_name(self):
         for rec in self:
-            value = dict(rec._fields['document_type'].selection).get(rec.document_type)
-            rec.name = str(rec.resolution_prefix) + ' - ' + \
-                       value + ' [' + rec.document_type + ']'
+            if rec.document_type:
+                value = dict(rec._fields['document_type'].selection).get(rec.document_type)
+                rec.name = str(rec.resolution_prefix) + ' - ' + \
+                           value + ' [' + rec.document_type + ']'
 
     @api.model
     def create(self, vals):

@@ -585,7 +585,7 @@ class AccountMove(models.Model):
         for move in self:
 
             directorio = "Facturacion/ArchivosXML/" + nit_company + "/"
-            #directoriozip = "Facturacion/Zip/" + nit_company + "/"
+            directoriozip = "Facturacion/Zip/" + nit_company + "/"
 
 
             if move.env.company.ruta_plantilla:
@@ -595,10 +595,10 @@ class AccountMove(models.Model):
 
             try:
                 os.stat(ruta_xml)
-                #os.stat(directoriozip)
+                os.stat(directoriozip)
             except:
                 os.makedirs(ruta_xml)
-                #os.makedirs(directoriozip)
+                os.makedirs(directoriozip)
 
             new_file = ruta_xml + move.name + '.xml'
 
@@ -642,11 +642,31 @@ class AccountMove(models.Model):
                     url_pdf = 'http://' + ip_ws + '/facturaPDF/' + str(
                         nit_company) + '/' + move.name + '.pdf'
 
-                    url_zip = 'http://'+ ip_ws + '/zip/' + attach[0:len(attach) - 4].replace('ad', 'z') + '.zip'
+                    #url_zip = 'http://'+ ip_ws + '/zip/' + attach[0:len(attach) - 4].replace('ad', 'z') + '.zip'
 
-                    #my_xml = requests.get(url_xml).content
-                    #my_pdf = requests.get(url_pdf).content
-                    my_zip_file = requests.get(url_zip).content
+                    my_xml = requests.get(url_xml).content
+                    my_pdf = requests.get(url_pdf).content
+                    #my_zip_file = requests.get(url_zip).content
+
+                    open(directoriozip + attach, 'wb').write(my_xml)
+                    open(directoriozip + self.name + '.pdf', 'wb').write(my_pdf)
+                    try:
+                        import zlib
+                        compression = zipfile.ZIP_DEFLATED
+                    except:
+                        compression = zipfile.ZIP_STORED
+
+                    zf = zipfile.ZipFile(directoriozip + attach[0:len(attach) - 4].replace('ad', 'z') + '.zip', mode='w')
+                    try:
+                        zf.write(directoriozip + attach, compress_type=compression,
+                                 arcname=os.path.basename(directoriozip + attach))
+                        zf.write(directoriozip + self.name + '.pdf', compress_type=compression,
+                                 arcname=os.path.basename(directoriozip + self.name + '.pdf'))
+                    finally:
+                        zf.close()
+                    name_zip = attach[0:len(attach) - 4].replace('ad', 'z')
+                    file_zip = directoriozip + name_zip + '.zip'''
+                    my_zip = open(file_zip, 'rb').read()
 
                 else:
                     estado_factura = 'Fallida'
@@ -655,11 +675,11 @@ class AccountMove(models.Model):
 
                 if estado_factura == 'Exitoso':
                     return (move.env['ir.attachment'].create({
-                        'name': attach[0:len(attach) - 4] + ".zip",
+                        'name': attach[0:len(attach) - 4].replace('ad', 'z') + ".zip",
                         'type': 'binary',
                         'res_id': move.id,
                         'res_model': 'account.move',
-                        'datas': base64.b64encode(my_zip_file),
+                        'datas': base64.b64encode(my_zip),
                         'mimetype': 'application/zip'
                     }), move.write({
                         'url_pdf': url_pdf,
@@ -674,19 +694,39 @@ class AccountMove(models.Model):
                         url_pdf = 'http://' + ip_ws + '/facturaPDF/' + str(
                             nit_company) + '/' + move.name + '.pdf'
 
-                        url_zip = 'http://' + ip_ws + '/zip/' + attach[0:len(attach) - 4].replace('ad', 'z') + '.zip'
+                        #url_zip = 'http://' + ip_ws + '/zip/' + attach[0:len(attach) - 4].replace('ad', 'z') + '.zip'
 
-                        #my_xml = requests.get(url_xml).content
-                        #my_pdf = requests.get(url_pdf).content
-                        my_zip_file = requests.get(url_zip).content
+                        my_xml = requests.get(url_xml).content
+                        my_pdf = requests.get(url_pdf).content
+                        #my_zip_file = requests.get(url_zip).content
+
+                        open(directoriozip + attach, 'wb').write(my_xml)
+                        open(directoriozip + self.name + '.pdf', 'wb').write(my_pdf)
+                        try:
+                            import zlib
+                            compression = zipfile.ZIP_DEFLATED
+                        except:
+                            compression = zipfile.ZIP_STORED
+
+                        zf = zipfile.ZipFile(directoriozip + attach[0:len(attach) - 4].replace('ad', 'z') + '.zip', mode='w')
+                        try:
+                            zf.write(directoriozip + attach, compress_type=compression,
+                                     arcname=os.path.basename(directoriozip + attach))
+                            zf.write(directoriozip + self.name + '.pdf', compress_type=compression,
+                                     arcname=os.path.basename(directoriozip + self.name + '.pdf'))
+                        finally:
+                            zf.close()
+                        name_zip = attach[0:len(attach) - 4]
+                        file_zip = directoriozip + name_zip + '.zip'''
+                        my_zip = open(file_zip, 'rb').read()
 
 
                         return (move.env['ir.attachment'].create({
-                            'name': attach[0:len(attach) - 4] + ".zip",
+                            'name': attach[0:len(attach) - 4].replace('ad', 'z') + ".zip",
                             'type': 'binary',
                             'res_id': move.id,
                             'res_model': 'account.move',
-                            'datas': base64.b64encode(my_zip_file),
+                            'datas': base64.b64encode(my_zip),
                             'mimetype': 'application/zip'
                         }), move.write({
                             'url_pdf': url_pdf,
