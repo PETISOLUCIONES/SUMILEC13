@@ -15,6 +15,14 @@ class AccountMove(models.Model):
         compute='_compute_payment_ids'
     )
 
+    # Campo pagado en diario, hace referencia al diario del primer pago registrado
+    payment_in_journal = fields.Many2one(
+        string="Pagado en diario",
+        comodel_name="account.journal",
+        compute="_compute_payment_in_journal",
+        store=True
+    )
+
     # rentabilidad generada en la factura
     x_studio_rentabilidad = fields.Monetary(
         string="Rentabilidad",
@@ -56,6 +64,16 @@ class AccountMove(models.Model):
     def _compute_payment_ids(self):
         for record in self:
             record.payments = self.env['account.payment'].search([('invoice_ids', 'in', record.id)]).sorted(key=lambda r: r.id)
+
+    @api.depends('payments', 'state', 'invoice_payment_state')
+    def _compute_payment_in_journal(self):
+        for record in self:
+            payments = self.env['account.payment'].search(
+                [('invoice_ids', 'in', record.id)]).sorted(key=lambda r: r.id)
+            if payments:
+                record.payment_in_journal = payments[0].journal_id
+            else:
+                record.payment_in_journal = None
 
     @api.depends('x_studio_costo_total')
     def _compute_rentabilidad(self):
