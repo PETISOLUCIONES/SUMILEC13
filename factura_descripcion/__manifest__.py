@@ -26,6 +26,6 @@
         'reports/report_invoice_document_with_description.xml',
         'reports/report_payment_receipt_document_with_journal_items.xml',
         'reports/product_template_form_view_rentability.xml',
-        'reports/view_account_move.xml',
+        'views/view_account_move.xml',
     ],
 }
