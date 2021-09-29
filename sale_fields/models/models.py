@@ -60,10 +60,11 @@ class ProductTemplate(models.Model):
 
 
     def _get_product_seller_code(self):
-        if self.seller_ids and self.seller_ids[0].product_code:
-            self.product_seller_code = self.seller_ids[0].product_code
-        else:
-            self.product_seller_code = ""
+        for product in self:
+            if product.seller_ids and product.seller_ids[0].product_name:
+                product.product_seller_code = product.seller_ids[0].product_name
+            else:
+                product.product_seller_code = ""
 
 
     @api.depends('product_variant_ids.qty_available_not_res')
