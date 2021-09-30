@@ -27,6 +27,7 @@
         'views/res_partner.xml',
         'views/product_template.xml',
         'report/sale_report.xml',
+        'planified_actions/planified_action.xml',
     ],
     'qweb': ['static/src/xml/qty_at_date.xml'],
 

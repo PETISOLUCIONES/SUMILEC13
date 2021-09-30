@@ -51,21 +51,13 @@ class SaleOrderLine(models.Model):
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    product_seller_code = fields.Char(string="Referencia Proveedor", compute="_get_product_seller_code", readonly=True)
+    product_seller_code = fields.Char(string="Referencia Proveedor")
+
     qty_available_not_res = fields.Float(
         string='Quantity On Hand Unreserved',
         compute='_compute_product_available_not_res',
         search='_search_quantity_unreserved',
     )
-
-
-    def _get_product_seller_code(self):
-        for product in self:
-            if product.seller_ids and product.seller_ids[0].product_name:
-                product.product_seller_code = product.seller_ids[0].product_name
-            else:
-                product.product_seller_code = ""
-
 
     @api.depends('product_variant_ids.qty_available_not_res')
     def _compute_product_available_not_res(self):

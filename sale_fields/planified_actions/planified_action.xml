@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="update_seller_code" model="ir.cron">
+            <field name="name">Actualizar Referencia de proveedor</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="nextcall">2021-08-01 00:00:00</field>
+            <field name="code">
+env['update.seller.code'].do_update()
+            </field>
+            <field eval="False" name="doall"/>
+            <field ref="model_update_seller_code" name="model_id"/>
+        </record>
+
+    </data>
+</odoo>
