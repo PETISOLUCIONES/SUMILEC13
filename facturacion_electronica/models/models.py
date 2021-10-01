@@ -2,7 +2,7 @@
 import base64
 
 import math
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.tools.float_utils import float_round
 from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
 import xml.etree.ElementTree as ET
@@ -133,6 +133,33 @@ class AccountMove(models.Model):
             rslt['context']['default_use_template'] = bool(template)
             rslt['context']['default_template_id'] = template and template.id or False
         return rslt
+
+    # Imprime la representación gráfica en lugar de la factura de Odoo
+    def action_invoice_print(self):
+        if any(not move.is_invoice(include_receipts=True) for move in self):
+            raise UserError(_("Only invoices could be printed."))
+        self.filtered(lambda inv: not inv.invoice_sent).write({'invoice_sent': True})
+        if self.url_pdf and self.invoice_status_dian == "Exitoso":
+            return {
+                'type': 'ir.actions.act_url',
+                'url': self.url_pdf,
+                'target': 'new',
+            }
+        else:
+            if self.user_has_groups('account.group_account_invoice'):
+                return self.env.ref('account.account_invoices').report_action(self)
+            else:
+                return self.env.ref('account.account_invoices_without_payment').report_action(self)
+
+    # Si la factura se encuentra aceptada por la DIAN, no permite generar la representación de Odoo
+    def _get_report_base_filename(self):
+        if any(not move.is_invoice() for move in self):
+            raise UserError(_("Only invoices could be printed."))
+
+        if any(move.url_pdf and move.invoice_status_dian == "Exitoso" for move in self):
+            raise UserError(_("Esta factura se encuentra aceptada por la DIAN. Por favor utilice la representación gráfica."))
+
+        return self._get_move_display_name()
 
     def action_post1(self):
 
@@ -1168,15 +1195,30 @@ class SaleOrder(models.Model):
 
     def _prepare_invoice(self):
         res = super(SaleOrder, self)._prepare_invoice()
-        payment_term = self.env['account.payment.term'].search([('name', '=', 'Pago inmediato')], limit=1)
-        if payment_term.name == 'Pago inmediato':
-            res['payment_mean_id'] = 1
-        else:
-            res['payment_mean_id'] = 2
+        #payment_term = self.env['account.payment.term'].search([('name', '=', 'Pago inmediato')], limit=1)
+        #if payment_term.name == 'Pago inmediato':
+        #res['payment_mean_id'] = 1
+        #else:
+        tipo = None
+        if self.payment_term_id:
+
+            if len(self.payment_term_id.line_ids.ids) == 1:
+                line = self.payment_term_id.line_ids[0]
+                if line.value_amount == 0 and line.days == 0 and line.value == 'balance':
+                    tipo = 1
+                elif line.days != 0:
+                    tipo = 2
+            else:
+                for term in self.payment_term_id.line_ids:
+                    if term.value != 'balance' or term.days != 0:
+                        tipo = 2
+        res['payment_mean_id'] = tipo
         return res
 
 
-'''class ValidateAccountMove(models.Model):
-    _inherit = 'validate.account.move'
+'''class AccountPaymentTerm(models.Model):
+    _inherit = 'account.payment.term'
 
-    def validate_move(self):'''
+    payment_mean_id = fields.Many2one('dian.paymentmean', string='Tipo de pago')'''
+
+

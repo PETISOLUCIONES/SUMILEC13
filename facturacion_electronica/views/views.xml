@@ -310,8 +310,11 @@
                 <xpath expr="//button[@name='button_draft']" position="attributes">
                      <attribute name="attrs">{'invisible': ['|','|', ('restrict_mode_hash_table', '=', True), ('state', 'not in', ('posted', 'cancel')), ('invoice_status_dian', '==', 'Exitoso')]}</attribute>
                 </xpath>
-                <xpath expr="//button[@name='action_invoice_sent']" position="attributes">
-                     <attribute name="attrs">{'invisible':[('invoice_status_dian', '!=', 'Exitoso')]}</attribute>
+                <xpath expr="//button[@name='action_invoice_sent'][1]" position="attributes">
+                     <attribute name="attrs">{'invisible':['|', '|', '|', ('state', '!=', 'posted'), ('invoice_sent', '=', True), ('type', 'not in', ('out_invoice', 'out_refund')), ('invoice_status_dian', '!=', 'Exitoso')]}</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_invoice_sent'][2]" position="attributes">
+                     <attribute name="attrs">{'invisible':['|', '|', '|', ('state', '!=', 'posted'), ('invoice_sent', '=', False), ('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')), ('invoice_status_dian', '!=', 'Exitoso')]}</attribute>
                 </xpath>
                  <xpath expr="//button[@name='action_reverse']" position="attributes">
                      <attribute name="attrs">{'invisible': [ '|','|', ('type', 'not in', ('out_invoice', 'in_invoice')), ('state', '!=', 'posted'),  ('invoice_status_dian', '==', 'Fallida'),  ]}</attribute>
@@ -341,6 +344,17 @@
             </field>
           </field>
       </record>
+
+      <!--<record id="view_account_payment_term_inherit" model="ir.ui.view">
+          <field name="name">account.payment.term.inherit</field>
+          <field name="model">account.payment.term</field>
+          <field name="inherit_id" ref="account.view_payment_term_form"/>
+          <field name="arch" type="xml">
+               <xpath expr="//field[@name='company_id']" position="after">
+                    <field name="payment_mean_id"/>
+                </xpath>
+          </field>
+      </record>-->
 
        <record id="view_accoun_move_debit_note_inherit" model="ir.ui.view">
           <field name="name">account.move.debit_note.form</field>
