@@ -6,11 +6,17 @@ class SaleOrderLine(models.Model):
     
     lot_ids = fields.Many2many('stock.production.lot',string='Lot', copy=False)
     
-    @api.onchange('lot_ids')
+    '''@api.onchange('lot_ids')
     def onchange_lot(self):
         self.product_uom_qty = 0.0
         for lot in self.lot_ids:
-            self.product_uom_qty += lot.product_qty 
+            quants = self.env['stock.quant'].search(
+                [('product_id', '=', lot.product_id.id), ('lot_id', 'in', lot.ids),
+                 ('location_id.usage', '=', 'internal')])
+            qty_avalibity = 0
+            for quant in quants:
+                qty_avalibity += quant.quantity - quant.reserved_quantity
+            self.product_uom_qty += qty_avalibity'''
 
     def _prepare_procurement_values(self, group_id=False):
         res = super(SaleOrderLine, self)._prepare_procurement_values(group_id=group_id)
