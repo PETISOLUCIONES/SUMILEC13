@@ -692,7 +692,7 @@ class AccountMove(models.Model):
                     finally:
                         zf.close()
                     name_zip = attach[0:len(attach) - 4].replace('ad', 'z')
-                    file_zip = directoriozip + name_zip + '.zip'''
+                    file_zip = directoriozip + name_zip + '.zip'
                     my_zip = open(file_zip, 'rb').read()
 
                 else:
@@ -743,8 +743,8 @@ class AccountMove(models.Model):
                                      arcname=os.path.basename(directoriozip + self.name + '.pdf'))
                         finally:
                             zf.close()
-                        name_zip = attach[0:len(attach) - 4]
-                        file_zip = directoriozip + name_zip + '.zip'''
+                        name_zip = attach[0:len(attach) - 4].replace('ad', 'z')
+                        file_zip = directoriozip + name_zip + '.zip'
                         my_zip = open(file_zip, 'rb').read()
 
 
