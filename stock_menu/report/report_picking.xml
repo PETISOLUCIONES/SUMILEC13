@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+        <template id="category_report" inherit_id="stock.report_picking">
+            <xpath expr="//table/thead/tr/th[@name='th_product']" position="after">
+                <th name="th_marca">
+                    <strong>Marca</strong>
+                </th>
+              </xpath>
+              <xpath expr="//table/tbody/t/t/tr/td[1]" position="after">
+                <td>
+                    <span t-field="ml.category_id.name"/><br/>
+                </td>
+              </xpath>
+                <xpath expr="//div[@name='div_sched_date']" position="after">
+                <div class="col-auto" name="div_vendedor">
+                    <strong>Vendedor:</strong>
+                    <p t-field="o.seller_name"/>
+                </div>
+                <div class="col-auto" name="div_plazo_pago">
+                    <strong>Plazo de pago:</strong>
+                    <p t-field="o.plazo_pago"/>
+                </div>
+              </xpath>
+            <xpath expr="//div[@name='div_outgoing_address']" position="replace">
+                <div class="col-6" name="div_outgoing_address">
+                    <div t-if="o.move_ids_without_package and o.move_ids_without_package[0].partner_id">
+                        <span><strong>Dirección de entrega:</strong></span>
+                        <div t-field="o.move_ids_without_package[0].partner_id"
+                            t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/>
+                    </div>
+                    <div t-if="o.picking_type_id.code != 'internal' and (not o.move_ids_without_package or not o.move_ids_without_package[0].partner_id) and o.picking_type_id.warehouse_id.partner_id">
+                        <span><strong>Dirección del almacén:</strong></span>
+                        <div t-field="o.picking_type_id.warehouse_id.partner_id"
+                            t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/>
+                    </div>
+                </div>
+            </xpath>
+
+        </template>
+</odoo>
