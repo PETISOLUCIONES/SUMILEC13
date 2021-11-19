@@ -62,7 +62,7 @@ class SaleOrderLine(models.Model):
             vals['price_unit'] = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, self.company_id)
         self.update(vals)
         lot_id = self.env['stock.production.lot'].search([('product_id', '=', self.product_id.id),('product_qty','=',0.0)])
-        lot = lot_id.filtered(lambda lot:lot.product_qty > 0)
+        lot = lot_id.filtered(lambda lot:lot.product_qty >= 0)
         result['domain'].update({'lot_ids': [('id', 'in', lot.ids)]})
         return result
 
