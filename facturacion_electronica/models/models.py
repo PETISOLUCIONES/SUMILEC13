@@ -254,9 +254,13 @@ class AccountMove(models.Model):
             total = subtotal + total_impuestos
 
             FiscalResposability_c = move.GetResponsibilities(move.company_id.fiscal_responsibility_ids)
-            nit_company = move.GetNitCompany(move.company_id.vat) if invoicetype != '05' else move.GetNitCompany(move.partner_id.vat)
-            CustNum = move.GetNitCompany(move.partner_id.vat)  if invoicetype != '05'else move.GetNitCompany(move.company_id.vat)
             invoicetype = move.GetInvoiceType(move)
+            nit_company = move.GetNitCompany(
+                move.company_id.vat) if invoicetype != '05' else move.GetNitCompany(
+                move.partner_id.vat)
+            CustNum = move.GetNitCompany(
+                move.partner_id.vat) if invoicetype != '05' else move.GetNitCompany(
+                move.company_id.vat)
             CustID = move.TypeDocumentCust(move.partner_id.l10n_co_document_type)
             comment = move.narration
             '''orders = move.env['sale.order'].search([('invoice_ids', 'in', [move.id] )])
