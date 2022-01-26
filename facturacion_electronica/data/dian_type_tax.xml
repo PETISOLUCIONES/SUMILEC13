@@ -107,7 +107,7 @@
 
         <record id="type_tax_ZZ" model="dian.typetax">
             <field name="name">Otros tributos, tasas, contribuciones, y similares</field>
-            <field name="code">01</field>
+            <field name="code">ZZ</field>
             <field name="description">Nombre de la figura tributaria</field>
             <field name="retention">False</field>
         </record>

@@ -270,7 +270,10 @@
                     </group>
                     <group>
                         <field name="debit_note" invisible="True"/>
-                        <field name="url_pdf" widget="url" readonly="True" attrs="{'invisible':['|',('invoice_status_dian','!=','Exitoso'), ('type', 'not in', ['out_invoice', 'out_refund'])]}"/>
+                        <!--<field name="url_pdf" widget="url" readonly="True" attrs="{'invisible':['|',('invoice_status_dian','!=','Exitoso'), ('type', 'not in', ['out_invoice', 'out_refund'])]}"/>-->
+                       <label string="Representación Gráfica" for="get_pdf_fact"
+                           class="o_form_label o_readonly_modifier"/>
+                        <button name="get_pdf_fact" type="object" string="Ver factura" attrs="{'invisible':['|',('invoice_status_dian','!=','Exitoso'), ('type', 'not in', ['out_invoice', 'out_refund'])]}"/>
                         <field name="url_xml" widget="url" readonly="True" attrs="{'invisible':['|', ('invoice_status_dian', '!=', 'Exitoso'), ('type', 'not in', ['out_invoice', 'out_refund'])]}"/>
                         <field name="invoice_status_dian" invisible="False" widget="label_selection" readonly="True"  options="{'classes': {['Fallida']: 'danger', ['Exitoso']: 'success'}}" attrs="{'invisible':[('type', 'not in', ['out_invoice', 'out_refund'])]}"/>
                         <field name="description_status_dian" attrs="{'invisible':['|',('invoice_status_dian', '!=', 'Fallida'), ('type', 'not in', ['out_invoice', 'out_refund'])]}" readonly="True"/>
@@ -285,6 +288,9 @@
                         </group>
                     </page>
                 </page>
+                <xpath expr="//field[@name='company_id']" position="after">
+                    <field name="currency_rate" attrs="{'invisible':[('type', 'not in', ['out_invoice', 'out_refund'])]}" readonly="True"/>
+                </xpath>
             </field>
         </record>
 

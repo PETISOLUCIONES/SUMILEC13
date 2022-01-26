@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 import base64
+from webbrowser import open_new, open_new_tab
 
 import math
 from odoo import models, fields, api, _
+from odoo.addons.web.controllers.main import serialize_exception,content_disposition
 from odoo.tools.float_utils import float_round
 from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
 import xml.etree.ElementTree as ET
 import os
 import requests
+from odoo.http import request
 import zipfile
 from datetime import datetime, date
+import os
+import glob
+
 import functools
 import operator
 
@@ -87,6 +93,15 @@ class AccountInvoiceSend(models.TransientModel):
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    def _get_report_base_filename(self, is_ok=False):
+        if self.invoice_status_dian == 'Exitoso':
+            return self.mostrar_pdf()
+        else:
+            return super(AccountMove, self)._get_report_base_filename()
+
+    def mostrar_pdf(self):
+        return open_new_tab(self.url_pdf)
+
     def _default_payment_method(self):
         return self.env['dian.paymentmethod'].search([('code', '=', '1')], limit=1).id
 
@@ -116,14 +131,14 @@ class AccountMove(models.Model):
         copy=False
     )
 
-    '''@api.onchange('invoice_date_due', 'invoice_payment_term_id')
-    def onchange_invoice_date_due(self):
-        for invoice in self:
-            fecha_actual = date.today()
-            if invoice.invoice_date_due > fecha_actual:
-                invoice.payment_mean_id = 2
-            elif invoice.invoice_date_due == fecha_actual:
-                invoice.payment_mean_id = 1'''
+    currency_rate = fields.Float(string='Tasa de cambio', digits=0, compute='onchange_currency_invoice')
+
+    @api.depends("currency_id", "invoice_date")
+    def onchange_currency_invoice(self):
+        date = self.invoice_date
+        rate = self.currency_id.with_context(date=date).rate
+        self.currency_rate = 1/rate
+
 
     def action_invoice_sent(self):
         rslt = super(AccountMove, self).action_invoice_sent()
@@ -213,29 +228,34 @@ class AccountMove(models.Model):
         for move in self:
             for line in move.invoice_line_ids:
                 if line.display_type != 'line_section' and line.display_type != 'line_note':
-                    total_descuento = total_descuento + ((line.discount / 100) * line.price_unit * line.quantity)
-                    if line.price_unit < 0:
-                        total_descuento = total_descuento + (-1 * line.price_unit)
-                        # subtotal = subtotal + (-1 * line.price_unit)
+                    line_price_unit = float_round((line.price_subtotal/(1-(line.discount/100)))/line.quantity, precision_rounding=line.move_id.currency_id.rounding)
+                    #total_descuento = total_descuento + ((line.discount / 100) * line.price_unit * line.quantity)
+                    total_descuento = total_descuento + ((line.discount / 100) * line_price_unit * line.quantity)
+                    #if line.price_unit < 0:
+                    if line_price_unit < 0:
+                        #total_descuento = total_descuento + (-1 * line.price_unit)
+                        total_descuento = total_descuento + (-1 * line_price_unit)
 
-                    price_unit_wo_discount = line.price_unit * (1 - (line.discount / 100.0))
+                    #price_unit_wo_discount = line.price_unit * (1 - (line.discount / 100.0))
+                    price_unit_wo_discount = line_price_unit * (1 - (line.discount / 100.0))
                     line_price_subtotal = line.quantity * price_unit_wo_discount
 
                     subtotal = subtotal + line_price_subtotal
                     for tax in line.tax_ids:
                         if tax.type_tax.name == 'IVA':
-                            '''total_impuestos = total_impuestos + ((tax.amount / 100) * ((line.price_unit * line.quantity) - (
-                                    (line.discount / 100) * line.price_unit * line.quantity)))'''
                             total_impuestos += (tax.amount / 100) * line.price_subtotal
                         elif tax.type_tax.name == 'ReteIVA' or tax.type_tax.name == 'ReteFuente' or tax.type_tax.name == 'ReteICA':
-                            total_retenciones = total_retenciones + ((tax.amount / 100) * (
+                            '''total_retenciones = total_retenciones + ((tax.amount / 100) * (
                                     (line.price_unit * line.quantity) - (
-                                    (line.discount / 100) * line.price_unit * line.quantity)))
+                                    (line.discount / 100) * line.price_unit * line.quantity)))'''
+                            total_retenciones = total_retenciones + ((tax.amount / 100) * (
+                                    (line_price_unit * line.quantity) - (
+                                    (line.discount / 100) * line_price_unit * line.quantity)))
             total = subtotal + total_impuestos
 
             FiscalResposability_c = move.GetResponsibilities(move.company_id.fiscal_responsibility_ids)
-            nit_company = move.GetNitCompany(move.company_id.vat)
-            CustNum = move.GetNitCompany(move.partner_id.vat)
+            nit_company = move.GetNitCompany(move.company_id.vat) if invoicetype != '05' else move.GetNitCompany(move.partner_id.vat)
+            CustNum = move.GetNitCompany(move.partner_id.vat)  if invoicetype != '05'else move.GetNitCompany(move.company_id.vat)
             invoicetype = move.GetInvoiceType(move)
             CustID = move.TypeDocumentCust(move.partner_id.l10n_co_document_type)
             comment = move.narration
@@ -246,6 +266,7 @@ class AccountMove(models.Model):
 
             if invoicetype == '91':
                 InvoiceRef = move.reversed_entry_id.name
+
                 InvoiceTypeRef =  move.GetInvoiceType(move.reversed_entry_id)
                 InvoiceDateRef = move.reversed_entry_id.invoice_date.strftime('%d/%m/%Y %H:%M:%S')
                 DueDateRef = move.reversed_entry_id.invoice_date_due.strftime('%d/%m/%Y %H:%M:%S')
@@ -290,6 +311,10 @@ class AccountMove(models.Model):
                 ResolutionRankTo = str(move.journal_id.sequence_id.resolution_id.resolution_to)
                 TecnicalKey = move.journal_id.sequence_id.resolution_id.resolution_technical_key
             elif invoicetype == '02':
+
+                date = move.invoice_date
+                rate = 1/move.currency_id.with_context(date=date).rate
+
                 InvoiceRef = '0'
                 InvoiceTypeRef = '0'
                 InvoiceDateRef = '0'
@@ -298,8 +323,8 @@ class AccountMove(models.Model):
                 CMReasonDesc_c = '0'
                 DMReasonCode_c = '0'
                 DMReasonDesc_c = '0'
-                CalculationRate_c = '0'
-                DateCalculationRate_c = '0'
+                CalculationRate_c = str(round(rate, 2))
+                DateCalculationRate_c = date.strftime('%Y-%m-%d')
 
                 Resolution_str = move.journal_id.sequence_id.resolution_id.resolution_resolution
                 ResolutionPrefix = move.journal_id.sequence_id.prefix
@@ -348,7 +373,7 @@ class AccountMove(models.Model):
                          CurrencyCode=move.company_id.currency_id.name,
                          CountryName=move.company_id.country_id.name,
                          CountryCode=move.company_id.country_id.code,
-                         OrderNum=move.invoice_origin,
+                         OrderNum=move.ref,
                          PostalZone=move.company_id.zip,
                          PhoneNum=move.company_id.phone,
                          Email=move.company_id.email,
@@ -425,7 +450,9 @@ class AccountMove(models.Model):
             i = 1
             for line in move.invoice_line_ids:
                 if line.display_type != 'line_section' and line.display_type != 'line_note':
-                    if line.price_unit > 0:
+                    line_price_unit = float_round((line.price_subtotal/(1-(line.discount/100)))/line.quantity, precision_rounding=line.move_id.currency_id.rounding)
+                    #if line.price_unit > 0:
+                    if line_price_unit > 0:
                         dato = dict(InvoiceNum=InvoiceNum,
                                     InvoiceLine=str(i),
                                     PartNum=line.product_id.default_code,
@@ -433,14 +460,20 @@ class AccountMove(models.Model):
                                     PartNumPartDescription=line.name,
                                     SellingShipQty=str(line.quantity),
                                     SalesUM=line.product_uom_id.name,
-                                    UnitPrice=str(round(line.price_unit, 2)),
-                                    DocUnitPrice=str(round(line.price_unit, 2)),
-                                    DocExtPrice=str(round(line.price_unit * line.quantity, 2)),
-                                    DspDocExtPrice=str(round(line.price_unit * line.quantity, 2)),
+                                    #UnitPrice=str(round(line.price_unit, 2)),
+                                    #DocUnitPrice=str(round(line.price_unit, 2)),
+                                    #DocExtPrice=str(round(line.price_unit * line.quantity, 2)),
+                                    #DspDocExtPrice=str(round(line.price_unit * line.quantity, 2)),
+                                    UnitPrice=str(round(line_price_unit, 2)),
+                                    DocUnitPrice=str(round(line_price_unit, 2)),
+                                    DocExtPrice=str(round(line_price_unit * line.quantity, 2)),
+                                    DspDocExtPrice=str(round(line_price_unit * line.quantity, 2)),
                                     DiscountPercent=str(line.discount),
-                                    Discount=str(round(line.price_unit * line.quantity * (line.discount / 100), 2)),
+                                    #Discount=str(round(line.price_unit * line.quantity * (line.discount / 100), 2)),
+                                    Discount=str(round(line_price_unit * line.quantity * (line.discount / 100), 2)),
                                     DocDiscount='0',
-                                    DspDocLessDiscount=str(round(line.price_unit * line.quantity * (line.discount / 100), 2)),
+                                    #DspDocLessDiscount=str(round(line.price_unit * line.quantity * (line.discount / 100), 2)),
+                                    DspDocLessDiscount=str(round(line_price_unit * line.quantity * (line.discount / 100), 2)),
                                     DspDocTotalMiscChrg='0',
                                     CurrencyCode=CurrencyCode,
                                     LineComment=line.product_id.categ_id.name)
@@ -461,8 +494,9 @@ class AccountMove(models.Model):
             i = 1
             for line in move.invoice_line_ids:
                 if line.display_type != 'line_section' and line.display_type != 'line_note':
-                    price_unit_wo_discount = line.price_unit * (1 - (line.discount / 100.0))
-                    #line_price_subtotal = line.quantity * price_unit_wo_discount
+                    line_price_unit = float_round((line.price_subtotal/(1-(line.discount/100)))/line.quantity, precision_rounding=line.move_id.currency_id.rounding)
+                    #price_unit_wo_discount = line.price_unit * (1 - (line.discount / 100.0))
+                    price_unit_wo_discount = line_price_unit * (1 - (line.discount / 100.0))
                     line_price_subtotal = line.price_subtotal
                     if line_price_subtotal > 0 and not line.name in producto_regalo:
                         if len(line.tax_ids) == 0:
@@ -502,13 +536,16 @@ class AccountMove(models.Model):
             i = 1
             for line in move.invoice_line_ids:
                 if line.display_type != 'line_section' and line.display_type != 'line_note':
-                    if line.price_unit > 0:
+                    line_price_unit = float_round((line.price_subtotal/(1-(line.discount/100)))/line.quantity, precision_rounding=line.move_id.currency_id.rounding)
+                    #if line.price_unit > 0:
+                    if line_price_unit > 0:
                         dato = dict(Company=nit_company,
                                     InvoiceNum=InvoiceNum,
                                     InvoiceLine=str(i),
                                     MiscCode='0',
                                     Description='Descuento',
-                                    MiscAmt=str(round(line.quantity * line.price_unit * (line.discount / 100), 2)),
+                                    #MiscAmt=str(round(line.quantity * line.price_unit * (line.discount / 100), 2)),
+                                    MiscAmt=str(round(line.quantity * line_price_unit * (line.discount / 100), 2)),
                                     DocMiscAmt='0',
                                     MiscCodeDescription='Descuento',
                                     PercentAmt=str(line.discount),
@@ -517,7 +554,8 @@ class AccountMove(models.Model):
                     else:
                         pos = 0
                         totalLinea = 0
-                        descuento = line.quantity * line.price_unit
+                        #descuento = line.quantity * line.price_unit
+                        descuento = line.quantity * line_price_unit
                         for move in self:
                             indice = 1
                             if pos > 0:
@@ -525,7 +563,8 @@ class AccountMove(models.Model):
                             for line in move.invoice_line_ids:
                                 if line.display_type != 'line_section' and line.display_type != 'line_note':
                                     if line.name in producto_regalo:
-                                        totalLinea = line.quantity * line.price_unit
+                                        #totalLinea = line.quantity * line.price_unit
+                                        totalLinea = line.quantity * line_price_unit
                                         pos = indice
                                         break
                                     indice = indice + 1
@@ -610,15 +649,21 @@ class AccountMove(models.Model):
             move.EditaNodos('COOneTime', datos, root)
 
         for move in self:
-
             directorio = "Facturacion/ArchivosXML/" + nit_company + "/"
             directoriozip = "Facturacion/Zip/" + nit_company + "/"
+            files = glob.glob(directoriozip +'*')
+            for f in files:
+                try:
+                    os.remove(f)
+                except Exception as e:
+                    print(f"Error:{e.strerror}")
 
 
-            if move.env.company.ruta_plantilla:
-                ruta_xml = move.env.company.ruta_plantilla + "/ArchivosXML/" + nit_company + "/"
-            else:
-                ruta_xml = directorio
+
+        if move.env.company.ruta_plantilla:
+            ruta_xml = move.env.company.ruta_plantilla + "/ArchivosXML/" + nit_company + "/"
+        else:
+            ruta_xml = directorio
 
             try:
                 os.stat(ruta_xml)
@@ -960,6 +1005,9 @@ class AccountMove(models.Model):
             elif dato.type != 'out_refund' and dato.debit_note == False:
                 # invoicetype = dato.document_type
                 invoicetype = dato.journal_id.sequence_id.resolution_id.document_type
+            #tipo de documento equivalente
+            elif dato.type == 'in_invoice' and dato.debit_note == False:
+                invoicetype = dato.journal_id.sequence_id.resolution_id.document_type
             return invoicetype
 
     def GetType(self, invoice):
@@ -970,6 +1018,8 @@ class AccountMove(models.Model):
             result = 'nc'
         elif invoice == '92':
             result = 'nd'
+        elif invoice == '05':
+            result = 'ads'
         return
 
     def GetNitCompany(self, number):
@@ -1038,6 +1088,54 @@ class AccountMove(models.Model):
                     if move.state == 'posted':
                         move.action_post1()
         return res
+
+    def get_pdf_fact(self):
+        for move in self:
+            numfact = move.name
+            nit = move.GetNitCompany(move.company_id.vat)
+            #numfact ='SW12761'
+            #nit = '891412809'
+            headers = {'content-type': 'text/xml;charset=utf-8'}
+            responsews = requests.post("http://facturaagil.com.co/WS_Facturacion_Electronica//api"
+                                       "/ConsultaPDF?Numerofact=" + numfact +
+                                       "&Nit=" + nit, data={},
+                                       headers=headers)
+            if responsews.status_code == 200:
+                respuesta = eval(responsews.content.decode('utf-8'))
+                if 'Respuesta' in respuesta:
+                    resultados = respuesta['Respuesta']
+                    str_pdf = move.GetResponseWS(resultados)
+                    str_byte64 = base64.b64decode(str_pdf)
+                    #probando descarga
+                    base_url = self.env['ir.config_parameter'].get_param(
+                        'web.base.url')
+                    attachment_obj = self.env['ir.attachment']
+                    files = self.env['ir.attachment'].search(
+                        [('access_token', '=', 'RGFPETI')], limit=1)
+                    if files :
+                        files.write({'name':  numfact + ".pdf", 'datas': base64.b64encode(str_byte64)})
+                        file_id = files.id
+
+                    else:
+                        attachment_id = attachment_obj.create(
+                        {'name':  numfact + ".pdf",  'type': 'binary',
+                         'datas': base64.b64encode(str_byte64),'mimetype':'application/pdf',
+                         'res_name': numfact +'s.pdf', 'access_token' : 'RGFPETI'})
+                        file_id = attachment_id.id
+                    download_url = '/web/content/' + str(
+                        file_id) + '?mimetype=application/pdf'
+                    # download
+                    return {
+                        "type": "ir.actions.act_url",
+                        "url": str(base_url) + str(download_url),
+                        "target": "new",
+                    }
+            else:
+                raise UserError(_("No se encuentra información de la factura "
+                                  " consultada"
+                                  ))
+
+
 
 
 class Company(models.Model):
