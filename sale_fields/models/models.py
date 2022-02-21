@@ -30,7 +30,7 @@ class SaleOrder(models.Model):
         res = super(SaleOrder, self).write(vals)
         for record in self:
             for linea in record.order_line:
-                if linea.price_reduce < linea.product_id.standard_price:
+                if linea.price_reduce < linea.purchase_price:
                     if not record.x_studio_permitir_menor_al_costo:
                         if record.state != 'sale':
                             raise UserError('NO puede vender a un precio menor al costo ')
