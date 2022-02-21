@@ -410,8 +410,8 @@ class AccountMove(models.Model):
                          InvoiceComment=comment,
                          InvoiceComment2=move.invoice_user_id.name,
                          InvoiceComment3=move.ref,
-                         CurrencyCode=move.partner_id.partner_currency_id.name,
-                         CurrencyCodeCurrencyID=move.partner_id.partner_currency_id.name,
+                         CurrencyCode=move.partner_id.currency_id.name,
+                         CurrencyCodeCurrencyID=move.partner_id.currency_id.name,
                          ContingencyInvoice='0',
                          NetWeight='0',
                          PorcAdministracion='0',
@@ -450,7 +450,7 @@ class AccountMove(models.Model):
         for move in self:
             datos = []
             InvoiceNum = move.name
-            CurrencyCode = move.partner_id.partner_currency_id.name
+            CurrencyCode = move.partner_id.currency_id.name
             i = 1
             for line in move.invoice_line_ids:
                 if line.display_type != 'line_section' and line.display_type != 'line_note':
@@ -494,7 +494,7 @@ class AccountMove(models.Model):
         for move in self:
             datos = []
             InvoiceNum = move.name
-            CurrencyCode = move.partner_id.partner_currency_id.name
+            CurrencyCode = move.partner_id.currency_id.name
             i = 1
             for line in move.invoice_line_ids:
                 if line.display_type != 'line_section' and line.display_type != 'line_note':
@@ -536,7 +536,7 @@ class AccountMove(models.Model):
         for move in self:
             datos = []
             InvoiceNum = move.name
-            CurrencyCode = move.partner_id.partner_currency_id.name
+            CurrencyCode = move.partner_id.currency_id.name
             i = 1
             for line in move.invoice_line_ids:
                 if line.display_type != 'line_section' and line.display_type != 'line_note':
@@ -601,7 +601,7 @@ class AccountMove(models.Model):
                          Address1=move.partner_id.street,
                          EMailAddress=move.partner_id.email,
                          PhoneNum=move.partner_id.phone,
-                         CurrencyCode=move.partner_id.partner_currency_id.name,
+                         CurrencyCode=move.partner_id.currency_id.name,
                          Country=move.partner_id.country_id.name,
                          CountryCode=move.partner_id.country_id.code,
                          PostalZone=move.partner_id.zip,
@@ -1111,8 +1111,8 @@ class AccountMove(models.Model):
                     str_pdf = move.GetResponseWS(resultados)
                     str_byte64 = base64.b64decode(str_pdf)
                     #probando descarga
-                    #base_url = self.env['ir.config_parameter'].get_param(
-                    base_url = request.httprequest.url_root
+                    base_url = self.env['ir.config_parameter'].get_param(
+                        'web.base.url')
                     attachment_obj = self.env['ir.attachment']
                     files = self.env['ir.attachment'].search(
                         [('access_token', '=', 'RGFPETI')], limit=1)
@@ -1126,7 +1126,7 @@ class AccountMove(models.Model):
                          'datas': base64.b64encode(str_byte64),'mimetype':'application/pdf',
                          'res_name': numfact +'s.pdf', 'access_token' : 'RGFPETI'})
                         file_id = attachment_id.id
-                    download_url = 'web/content/' + str(
+                    download_url = '/web/content/' + str(
                         file_id) + '?mimetype=application/pdf'
                     # download
                     return {
@@ -1175,7 +1175,6 @@ class ResPartner(models.Model):
     fiscal_responsibility_partner_ids = fields.Many2many("dian.fiscalresponsibility",
                                                          string='Responsabilidades fiscales')
     commercial_registration_partner = fields.Char(string='Matricula mercantil')
-    partner_currency_id = fields.Many2one('res.currency',  string="Currency", help='Campo usado para generar factura DIAN')
     # representation_type_id = fields.Many2one('dian.fiscalresponsibility', string='Tipo de representación')
     # establishment_type_id = fields.Many2one('dian.fiscalresponsibility', string='Tipo de establecimiento')
     # customs_type_ids = fields.Many2many('dian.fiscalresponsibility', string='Usuario aduanero')
