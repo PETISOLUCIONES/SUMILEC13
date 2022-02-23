@@ -1116,6 +1116,7 @@ class AccountMove(models.Model):
                     attachment_obj = self.env['ir.attachment']
                     files = self.env['ir.attachment'].search(
                         [('access_token', '=', 'RGFPETI')], limit=1)
+                    files.update({'public': True})
                     if files :
                         files.write({'name':  numfact + ".pdf", 'datas': base64.b64encode(str_byte64)})
                         file_id = files.id
@@ -1124,7 +1125,8 @@ class AccountMove(models.Model):
                         attachment_id = attachment_obj.create(
                         {'name':  numfact + ".pdf",  'type': 'binary',
                          'datas': base64.b64encode(str_byte64),'mimetype':'application/pdf',
-                         'res_name': numfact +'s.pdf', 'access_token' : 'RGFPETI'})
+                         'res_name': numfact +'s.pdf', 'access_token' : 'RGFPETI',
+                         'public': True})
                         file_id = attachment_id.id
                     download_url = 'web/content/' + str(
                         file_id) + '?mimetype=application/pdf'
