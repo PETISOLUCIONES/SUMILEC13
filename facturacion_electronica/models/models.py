@@ -1097,7 +1097,7 @@ class AccountMove(models.Model):
         for move in self:
             numfact = move.name
             nit = move.GetNitCompany(move.company_id.vat)
-            #numfact ='SW12761'
+            #numfact ='SW12763'
             #nit = '891412809'
             headers = {'content-type': 'text/xml;charset=utf-8'}
             responsews = requests.post("http://facturaagil.com.co/WS_Facturacion_Electronica//api"
@@ -1113,16 +1113,18 @@ class AccountMove(models.Model):
                     #probando descarga
                     #base_url = self.env['ir.config_parameter'].get_param(
                     base_url = request.httprequest.url_root
+                    #se envia como sudo para evitar la validación de si es employee
                     attachment_obj = self.env['ir.attachment']
-                    files = self.env['ir.attachment'].search(
+                    files = self.env['ir.attachment'].sudo().search(
                         [('access_token', '=', 'RGFPETI')], limit=1)
-                    files.update({'public': True})
                     if files :
+                        files.write({'public': True})
                         files.write({'name':  numfact + ".pdf", 'datas': base64.b64encode(str_byte64)})
                         file_id = files.id
 
                     else:
-                        attachment_id = attachment_obj.create(
+                        # se envia como sudo para evitar la validación de si es employee
+                        attachment_id = attachment_obj.sudo().create(
                         {'name':  numfact + ".pdf",  'type': 'binary',
                          'datas': base64.b64encode(str_byte64),'mimetype':'application/pdf',
                          'res_name': numfact +'s.pdf', 'access_token' : 'RGFPETI',
