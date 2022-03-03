@@ -54,42 +54,43 @@ class StockMove(models.Model):
                                     break
 
                 else:
-                    move.move_line_ids.unlink()
-                    for l in lista_lotes:
-                        if l:
-                            monto_reservar = 0
-                            monto_total = move.product_uom_qty
-                            qty_reserved = 0
-                            for quant in l.quant_ids:
-                                qty_reserved += quant.reserved_quantity
-                            qty_available = l.product_qty - qty_reserved
-                            if qty_available < monto_total:
-                                monto_reservar = qty_available
-                                monto_total = monto_total - monto_reservar
-                            else:
-                                monto_reservar = monto_total
-                            if monto_reservar > 0:
-                                quants = move.env['stock.quant']._gather(move.product_id, move.location_id,
-                                                                         lot_id=l, strict=False)
+                    if move.product_id.tracking != 'none':
+                        move.move_line_ids.unlink()
+                        for l in lista_lotes:
+                            if l and move.product_id.tracking != 'none':
+                                monto_reservar = 0
+                                monto_total = move.product_uom_qty
+                                qty_reserved = 0
+                                for quant in l.quant_ids:
+                                    qty_reserved += quant.reserved_quantity
+                                qty_available = l.product_qty - qty_reserved
+                                if qty_available < monto_total:
+                                    monto_reservar = qty_available
+                                    monto_total = monto_total - monto_reservar
+                                else:
+                                    monto_reservar = monto_total
+                                if monto_reservar > 0:
+                                    quants = move.env['stock.quant']._gather(move.product_id, move.location_id,
+                                                                             lot_id=l, strict=False)
 
-                                for quant in quants:
-                                    disponible = quant.quantity - quant.reserved_quantity
-                                    if float_compare(disponible, monto_reservar, precision_digits=rounding) != -1:
-                                        vals = {
-                                            'move_id': move.id,
-                                            'product_id': move.product_id.id,
-                                            'product_uom_id': move.product_uom.id,
-                                            'location_id': quant.location_id.id,
-                                            'location_dest_id': move.location_dest_id.id,
-                                            'picking_id': move.picking_id.id,
-                                            'lot_id': l.id,
-                                            'state': 'assigned',
-                                            'product_uom_qty': monto_reservar
-                                        }
-                                        self.env['stock.move.line'].create(vals)
-                                        quants = move.env['stock.quant']._update_reserved_quantity(
-                                            move.product_id, quant.location_id, monto_reservar, lot_id=l, strict=False)
-                                        break
+                                    for quant in quants:
+                                        disponible = quant.quantity - quant.reserved_quantity
+                                        if float_compare(disponible, monto_reservar, precision_digits=rounding) != -1:
+                                            vals = {
+                                                'move_id': move.id,
+                                                'product_id': move.product_id.id,
+                                                'product_uom_id': move.product_uom.id,
+                                                'location_id': quant.location_id.id,
+                                                'location_dest_id': move.location_dest_id.id,
+                                                'picking_id': move.picking_id.id,
+                                                'lot_id':  l.id if l.product_id == move.product_id else False,
+                                                'state': 'assigned',
+                                                'product_uom_qty': monto_reservar
+                                            }
+                                            self.env['stock.move.line'].create(vals)
+                                            quants = move.env['stock.quant']._update_reserved_quantity(
+                                                move.product_id, quant.location_id, monto_reservar, lot_id=l, strict=False)
+                                            break
 
 
             if move.product_uom_qty != move.reserved_availability:
