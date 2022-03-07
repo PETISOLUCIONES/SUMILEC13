@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+  <data>
+        <record id="view_res_partner_add_vendedor_proveedor" model="ir.ui.view">
+            <field name="name">view.res.partner.add.vendedor.proveedor</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id"
+                   ref="account.view_partner_property_form"/> <!--utiliza como referencia el id externo de la vista de formulario-->
+            <field name="arch" type="xml">
+                <!--para ubicar la etiqueta de referencia-->
+                <xpath expr="//field [@ name = 'property_supplier_payment_term_id']" position="before">
+                    <field name="vendedores_autorizados_id" widget="many2many_tags" options="{'no_create_edit':True}"/>
+                </xpath>                            
+
+            </field>
+        </record>
+
+  </data>
+</odoo>
