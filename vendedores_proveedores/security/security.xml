@@ -1,0 +1,13 @@
+<odoo>
+
+<!--    &lt;!&ndash;    permisos los clientes que pertenecen a una zona&ndash;&gt;
+    <record id="model_access_zona_cliente_line" model="ir.model.access">
+        <field name="name">model_access_zona_cliente_line</field>
+        <field name="model_id" ref="ZonaVentas.model_zona_cliente_line"/>
+        <field name="group_id" ref="base.group_system"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>-->
+</odoo>
