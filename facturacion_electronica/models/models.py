@@ -40,6 +40,7 @@ class MoveReversal(models.TransientModel):
 
 class ConceptNoteDebit(models.Model):
     _name = 'dian.debitnoteconcept'
+    _description = 'Conceptos nota debito'
 
     name = fields.Char(String='Descripción')
     code = fields.Char(String='Codigo')
@@ -47,6 +48,8 @@ class ConceptNoteDebit(models.Model):
 
 class ConceptNoteCredit(models.Model):
     _name = 'dian.creditnoteconcept'
+    _description = 'Conceptos nota credito'
+
 
     name = fields.Char(String='Descripción')
     code = fields.Char(String='Codigo')
@@ -54,6 +57,7 @@ class ConceptNoteCredit(models.Model):
 
 class PaymentMethod(models.Model):
     _name = 'dian.paymentmethod'
+    _description = 'Metodos de pago DIAN'
 
     name = fields.Char(String='Nombre')
     code = fields.Char(String='Codigo')
@@ -61,6 +65,7 @@ class PaymentMethod(models.Model):
 
 class FormaPago(models.Model):
     _name = 'dian.paymentmean'
+    _description = 'Formas de pago DIAN'
 
     name = fields.Char(String='Nombre')
     code = fields.Char(String='Codigo')
@@ -1149,12 +1154,12 @@ class AccountMove(models.Model):
 class Company(models.Model):
     _inherit = 'res.company'
 
-    operation_type_id = fields.Many2one("dian.operationtype", string='Tipo de operación', required=True)
-    company_type_id = fields.Many2one("dian.companytype", string='Tipo de empresa', required=True)
-    document_type_id = fields.Many2one("dian.documenttype", string='Tipo de documento', required=True)
-    regime_type = fields.Char(string='Tipo de regimen', required=True)
+    operation_type_id = fields.Many2one("dian.operationtype", string='Tipo de operación' )
+    company_type_id = fields.Many2one("dian.companytype", string='Tipo de empresa')
+    document_type_id = fields.Many2one("dian.documenttype", string='Tipo de documento')
+    regime_type = fields.Char(string='Tipo de regimen')
     fiscal_responsibility_ids = fields.Many2many("dian.fiscalresponsibility", string='Responsabilidades fiscales')
-    commercial_registration = fields.Char(string='Matricula mercantil', required=True)
+    commercial_registration = fields.Char(string='Matricula mercantil')
 
     software_pin = fields.Char(string='PIN del software')
     test_set = fields.Char(string='Test Set')
@@ -1174,7 +1179,7 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     # city_id = fields.Many2one('res.city', string='Ciudad')
-    document_type_id = fields.Many2one("dian.documenttype", string='Tipo de documento', required=True)
+    document_type_id = fields.Many2one("dian.documenttype", string='Tipo de documento')
     organization_type_id = fields.Many2one('dian.companytype', string='Tipo de organizacion')
     fiscal_responsibility_partner_ids = fields.Many2many("dian.fiscalresponsibility",
                                                          string='Responsabilidades fiscales')
@@ -1196,6 +1201,7 @@ class ResCountry(models.Model):
 
 class FiscalRegimen(models.Model):
     _name = 'dian.fiscalregimen'
+    _description = 'Regimen fiscal DIAN'
 
     name = fields.Char(String='Nombre')
     code = fields.Char(String='Codigo')
@@ -1209,6 +1215,7 @@ class AccountTax(models.Model):
 
 class TypeTax(models.Model):
     _name = 'dian.typetax'
+    _description = 'Tipo de impuesto DIAN'
 
     name = fields.Char(string='Nombre')
     code = fields.Char(string='Codigo')
@@ -1234,7 +1241,7 @@ class CompanyType(models.Model):
 
 class DocumentType(models.Model):
     _name = 'dian.documenttype'
-    _description = 'tipo de compañia'
+    _description = 'tipo de documento'
 
     code = fields.Char(string='Codido', required=True)
     name = fields.Char(string='Nombre', required=True)
