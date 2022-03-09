@@ -23,7 +23,7 @@ class StockPicking(models.Model):
                     rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
                     for line in move.move_line_ids:
                         qty_done = line.qty_done
-                        if line.lot_id and line.lot_id.qty_packing != 0:
+                        if line.lot_id and line.lot_id.qty_packing != 0 and line.product_id.tracking != 'none':
                             quants = move.env['stock.quant']._gather(line.product_id, line.location_id, lot_id=line.lot_id, strict=True)
                             if quants.quantity % line.lot_id.qty_packing != 0:
                                 qty_restante = quants.quantity % line.lot_id.qty_packing
@@ -83,7 +83,7 @@ class StockPicking(models.Model):
                 name = "00" + str(lot_count+1)
         else:
             name = "001"
-        name_count = self.env['stock.production.lot'].search_count([('name', '=', name)])
+        name_count = self.env['stock.production.lot'].search_count([('name', '=', name), ('product_id', '=', product_id)])
         if name_count > 0:
             return False
         return name
