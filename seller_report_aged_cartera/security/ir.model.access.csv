@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_seller_report_aged_cartera_seller_report_aged_cartera,seller_report_aged_cartera.seller_report_aged_cartera,model_seller_report_aged_cartera_seller_report_aged_cartera,base.group_user,1,1,1,1

@@ -1,0 +1,75 @@
+<odoo>
+  <data>
+
+    <template id="search_template_seller" inherit_id="account_reports.search_template_partner">
+            <!--<a t-if="options.get('partner')" type="button" class="dropdown-toggle account_partner_filter"
+               data-toggle="dropdown">
+                <span class="fa fa-folder-open"/>
+                Vendedores
+            </a>-->
+
+            <xpath expr="//li[@class='o_account_report_search js_account_partner_m2m']" position="replace">
+          <!--  <t t-jquery=".dropdown-menu .o_filters_menu" t-operation='append'>-->
+                <li class="o_account_report_search js_account_partner_m2m"/>
+            </xpath>
+
+
+        </template>
+    <!-- explicit list view definition -->
+<!--
+    <record model="ir.ui.view" id="seller_report_aged_cartera.list">
+      <field name="name">seller_report_aged_cartera list</field>
+      <field name="model">seller_report_aged_cartera.seller_report_aged_cartera</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </tree>
+      </field>
+    </record>
+-->
+
+    <!-- actions opening views on models -->
+<!--
+    <record model="ir.actions.act_window" id="seller_report_aged_cartera.action_window">
+      <field name="name">seller_report_aged_cartera window</field>
+      <field name="res_model">seller_report_aged_cartera.seller_report_aged_cartera</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+-->
+
+    <!-- server action to the one above -->
+<!--
+    <record model="ir.actions.server" id="seller_report_aged_cartera.action_server">
+      <field name="name">seller_report_aged_cartera server</field>
+      <field name="model_id" ref="model_seller_report_aged_cartera_seller_report_aged_cartera"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": model._name,
+        }
+      </field>
+    </record>
+-->
+
+    <!-- Top menu item -->
+<!--
+    <menuitem name="seller_report_aged_cartera" id="seller_report_aged_cartera.menu_root"/>
+-->
+    <!-- menu categories -->
+<!--
+    <menuitem name="Menu 1" id="seller_report_aged_cartera.menu_1" parent="seller_report_aged_cartera.menu_root"/>
+    <menuitem name="Menu 2" id="seller_report_aged_cartera.menu_2" parent="seller_report_aged_cartera.menu_root"/>
+-->
+    <!-- actions -->
+<!--
+    <menuitem name="List" id="seller_report_aged_cartera.menu_1_list" parent="seller_report_aged_cartera.menu_1"
+              action="seller_report_aged_cartera.action_window"/>
+    <menuitem name="Server to list" id="seller_report_aged_cartera" parent="seller_report_aged_cartera.menu_2"
+              action="seller_report_aged_cartera.action_server"/>
+-->
+  </data>
+</odoo>
