@@ -49,7 +49,7 @@ class SaleOrderLine(models.Model):
             message = product.sale_line_warn_msg
             warning['title'] = title
             warning['message'] = message
-            result = {'warning': warning}
+            result['warning'] = warning
             if product.sale_line_warn == 'block':
                 self.product_id = False
                 return result
