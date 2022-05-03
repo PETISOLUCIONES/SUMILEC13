@@ -163,7 +163,16 @@
         </field>
     </record>
 
-
+    <record id="view_account_move_form_inherit" model="ir.ui.view">
+        <field name="name">view.account.move.form.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook/page/field/tree/field[@name='discount']" position="replace">
+                <field name="discount" string="Disc.%" groups="permisos_super.group_account_invoice_field_discount" optional="show"/>
+            </xpath>
+        </field>
+    </record>
 
 
 

@@ -15,4 +15,10 @@
         <field name="name">Acceso contactos</field>
         <field name="users" eval="[(4, ref('base.user_root'))]"/>
     </record>
+
+    <record id="group_account_invoice_field_discount" model="res.groups">
+        <field name="name">Access Discount</field>
+        <field name="category_id" ref="base.module_category_accounting_accounting"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
 </odoo>
