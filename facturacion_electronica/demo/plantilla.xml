@@ -22,6 +22,8 @@
     <InvoiceDate></InvoiceDate>
     <DueDate></DueDate>
     <DocWHTaxAmt></DocWHTaxAmt>
+    <TaxAmtLineReteiva></TaxAmtLineReteiva>
+    <TaxAmtLineReteica></TaxAmtLineReteica>
     <InvoiceComment></InvoiceComment>
     <InvoiceComment1></InvoiceComment1>
     <InvoiceComment2></InvoiceComment2>

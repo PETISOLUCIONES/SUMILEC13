@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
 from webbrowser import open_new, open_new_tab
+import pytz
 
 import math
 from odoo import models, fields, api, _
@@ -199,6 +200,8 @@ class AccountMove(models.Model):
         total_descuento = 0
         total_impuestos = 0
         total_retenciones = 0
+        total_reteiva = 0
+        total_reteica = 0
         total = 0
         subtotal = 0
         FiscalResposability_c = ''
@@ -249,11 +252,16 @@ class AccountMove(models.Model):
                     for tax in line.tax_ids:
                         if tax.type_tax.name == 'IVA':
                             total_impuestos += (tax.amount / 100) * line.price_subtotal
-                        elif tax.type_tax.name == 'ReteIVA' or tax.type_tax.name == 'ReteFuente' or tax.type_tax.name == 'ReteICA':
-                            '''total_retenciones = total_retenciones + ((tax.amount / 100) * (
-                                    (line.price_unit * line.quantity) - (
-                                    (line.discount / 100) * line.price_unit * line.quantity)))'''
+                        elif tax.type_tax.name == 'ReteFuente':
                             total_retenciones = total_retenciones + ((tax.amount / 100) * (
+                                    (line_price_unit * line.quantity) - (
+                                    (line.discount / 100) * line_price_unit * line.quantity)))
+                        elif tax.type_tax.name == 'ReteIVA':
+                            total_reteiva = total_reteiva + ((tax.amount / 100) * (
+                                    (line_price_unit * line.quantity) - (
+                                    (line.discount / 100) * line_price_unit * line.quantity)))
+                        elif tax.type_tax.name == 'ReteICA':
+                            total_reteica = total_reteica + ((tax.amount / 100) * (
                                     (line_price_unit * line.quantity) - (
                                     (line.discount / 100) * line_price_unit * line.quantity)))
             total = subtotal + total_impuestos
@@ -261,11 +269,11 @@ class AccountMove(models.Model):
             FiscalResposability_c = move.GetResponsibilities(move.company_id.fiscal_responsibility_ids)
             invoicetype = move.GetInvoiceType(move)
             nit_company = move.GetNitCompany(
-                move.company_id.vat) if invoicetype != '05' else move.GetNitCompany(
-                move.partner_id.vat)
+                move.company_id.vat,  move.company_id.country_id.code) if invoicetype != '05' else move.GetNitCompany(
+                move.partner_id.vat,  move.partner_id.country_id.code)
             CustNum = move.GetNitCompany(
-                move.partner_id.vat) if invoicetype != '05' else move.GetNitCompany(
-                move.company_id.vat)
+                move.partner_id.vat,  move.partner_id.country_id.code) if invoicetype != '05' else move.GetNitCompany(
+                move.company_id.vat,  move.company_id.country_id.code)
             CustID = move.TypeDocumentCust(move.partner_id.l10n_co_document_type)
             comment = move.narration
             '''orders = move.env['sale.order'].search([('invoice_ids', 'in', [move.id] )])
@@ -390,7 +398,15 @@ class AccountMove(models.Model):
                          CorporateRegistration=move.company_id.commercial_registration)
             move.EditaCompany(datos, root)
         for move in self:
-            now = datetime.now()
+            # Get current timezone
+            tz = self.env.user.tz
+            if tz:
+                local_tz = pytz.timezone(tz)
+            else:
+                local_tz = pytz.utc
+
+            # Get current time
+            now = datetime.now(local_tz)
             datos = dict(Company=nit_company,
                          InvoiceType=invoicetype,
                          InvoiceNum=move.name,
@@ -409,14 +425,18 @@ class AccountMove(models.Model):
                          ContactCity=' ',
                          ContactAddress=' ',
                          CustomerName=move.partner_id.name,
-                         InvoiceDate=move.invoice_date.strftime('%d/%m/%Y') + ' ' + datetime.now().strftime('%H:%M:%S'),
-                         DueDate=move.invoice_date_due.strftime('%d/%m/%Y') + ' ' + datetime.now().strftime('%H:%M:%S'),
+                         InvoiceDate=now.strftime('%d/%m/%Y %H:%M:%S'),
+                         DueDate=now.strftime('%d/%m/%Y %H:%M:%S'),
                          DocWHTaxAmt=str(round(abs(total_retenciones), 2)),
+                         TaxAmtLineReteiva=str(round(abs(total_reteiva), 2)),
+                         TaxAmtLineReteica=str(round(abs(total_reteica), 2)),
                          InvoiceComment=comment,
+                         InvoiceComment1=comment,
                          InvoiceComment2=move.invoice_user_id.name,
                          InvoiceComment3=move.ref,
-                         CurrencyCode=move.partner_id.partner_currency_id.name,
-                         CurrencyCodeCurrencyID=move.partner_id.partner_currency_id.name,
+                         InvoiceComment4=CMReasonDesc_c if invoicetype == '91' else DMReasonDesc_c if invoicetype == '92' else "",
+                         CurrencyCode=move.currency_id.name,
+                         CurrencyCodeCurrencyID=move.currency_id.name,
                          ContingencyInvoice='0',
                          NetWeight='0',
                          PorcAdministracion='0',
@@ -446,16 +466,16 @@ class AccountMove(models.Model):
                          CalculationRate_c=CalculationRate_c,
                          DateCalculationRate_c=DateCalculationRate_c,
                          ConditionPay='0',
-                         DspDocSubTotal=str(round(subtotal, 2)),
-                         DocTaxAmt=str(round(float_round(total_impuestos, precision_digits=2),2)),
-                         DspDocInvoiceAmt=str(round(total, 2)),
-                         Discount=str(round(total_descuento, 2)))
+                         DspDocSubTotal=str(round(float_round(subtotal, precision_digits=2), 2)),
+                         DocTaxAmt=str(round(float_round(total_impuestos, precision_digits=2), 2)),
+                         DspDocInvoiceAmt=str(round(float_round(total, precision_digits=2), 2)),
+                         Discount=str(round(float_round(total_descuento, precision_digits=2), 2)))
         self.EditaNodos('InvcHead', datos, root)
 
         for move in self:
             datos = []
             InvoiceNum = move.name
-            CurrencyCode = move.partner_id.partner_currency_id.name
+            CurrencyCode = move.currency_id.name
             i = 1
             for line in move.invoice_line_ids:
                 if line.display_type != 'line_section' and line.display_type != 'line_note':
@@ -499,14 +519,14 @@ class AccountMove(models.Model):
         for move in self:
             datos = []
             InvoiceNum = move.name
-            CurrencyCode = move.partner_id.partner_currency_id.name
+            CurrencyCode = move.currency_id.name
             i = 1
             for line in move.invoice_line_ids:
                 if line.display_type != 'line_section' and line.display_type != 'line_note':
                     line_price_unit = float_round((line.price_subtotal/(1-(line.discount/100)))/line.quantity, precision_rounding=line.move_id.currency_id.rounding)
                     #price_unit_wo_discount = line.price_unit * (1 - (line.discount / 100.0))
                     price_unit_wo_discount = line_price_unit * (1 - (line.discount / 100.0))
-                    line_price_subtotal = line.price_subtotal
+                    line_price_subtotal = round(line_price_unit, 2) * line.quantity
                     if line_price_subtotal > 0 and not line.name in producto_regalo:
                         if len(line.tax_ids) == 0:
                             dato = dict(Company=nit_company,
@@ -541,7 +561,7 @@ class AccountMove(models.Model):
         for move in self:
             datos = []
             InvoiceNum = move.name
-            CurrencyCode = move.partner_id.partner_currency_id.name
+            CurrencyCode = move.currency_id.name
             i = 1
             for line in move.invoice_line_ids:
                 if line.display_type != 'line_section' and line.display_type != 'line_note':
@@ -606,7 +626,7 @@ class AccountMove(models.Model):
                          Address1=move.partner_id.street,
                          EMailAddress=move.partner_id.email,
                          PhoneNum=move.partner_id.phone,
-                         CurrencyCode=move.partner_id.partner_currency_id.name,
+                         CurrencyCode=move.currency_id.name,
                          Country=move.partner_id.country_id.name,
                          CountryCode=move.partner_id.country_id.code,
                          PostalZone=move.partner_id.zip,
@@ -671,8 +691,10 @@ class AccountMove(models.Model):
 
         if move.env.company.ruta_plantilla:
             ruta_xml = move.env.company.ruta_plantilla + "/ArchivosXML/" + nit_company + "/"
+            directoriozip = move.env.company.ruta_plantilla + "/Zip/" + nit_company + "/"
         else:
             ruta_xml = directorio
+            directoriozip = directoriozip
 
             try:
                 os.stat(ruta_xml)
@@ -1031,9 +1053,13 @@ class AccountMove(models.Model):
             result = 'ads'
         return
 
-    def GetNitCompany(self, number):
+    def GetNitCompany(self, number, country_code):
         document = ''
         try:
+            if country_code in number and country_code == 'CO':
+                number = number[:-1]
+            if country_code in number:
+                number = number.replace(country_code, '')
             if '-' in number:
                 document = number[0:number.find('-')]
             else:
@@ -1101,7 +1127,7 @@ class AccountMove(models.Model):
     def get_pdf_fact(self):
         for move in self:
             numfact = move.name
-            nit = move.GetNitCompany(move.company_id.vat)
+            nit = move.GetNitCompany(move.company_id.vat, move.company_id.country_id.code)
             #numfact ='SW12763'
             #nit = '891412809'
             headers = {'content-type': 'text/xml;charset=utf-8'}
