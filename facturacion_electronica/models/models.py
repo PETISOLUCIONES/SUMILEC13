@@ -427,7 +427,7 @@ class AccountMove(models.Model):
                          ContactAddress=' ',
                          CustomerName=move.partner_id.name,
                          InvoiceDate=now.strftime('%d/%m/%Y %H:%M:%S'),
-                         DueDate=now.strftime('%d/%m/%Y %H:%M:%S'),
+                         DueDate=move.invoice_date_due.strftime('%d/%m/%Y') + " " + now.strftime('%H:%M:%S'),  #now.strftime('%d/%m/%Y %H:%M:%S'),
                          DocWHTaxAmt=str(round(abs(total_retenciones), 2)),
                          TaxAmtLineReteiva=str(round(abs(total_reteiva), 2)),
                          TaxAmtLineReteica=str(round(abs(total_reteica), 2)),
