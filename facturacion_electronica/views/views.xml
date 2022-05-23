@@ -263,20 +263,21 @@
                 <xpath expr="//group[@id='header_right_group']" position="after">
                     <group>
                         <!--<field name="document_type" attrs="{'readonly':[('state','not in',['draft'])],'required':[('type', '=', 'out_invoice')], 'invisible':[('type', '!=', 'out_invoice')]}" />-->
-                        <field name="payment_method_id" groups="facturacion_electronica.l10n_co_edi_jorels_group_user,facturacion_electronica.l10n_co_edi_jorels_group_manager" attrs="{'readonly':[('state','not in',['draft'])], 'invisible':[('type', 'not in', ['out_invoice', 'out_refund'])]}" />
-                        <field name="payment_mean_id" groups="facturacion_electronica.l10n_co_edi_jorels_group_user,facturacion_electronica.l10n_co_edi_jorels_group_manager" attrs="{'readonly':[('state','not in',['draft'])], 'invisible':[('type', 'not in', ['out_invoice', 'out_refund'])]}" />
-                        <field name="description_code_credit" groups="facturacion_electronica.l10n_co_edi_jorels_group_user,facturacion_electronica.l10n_co_edi_jorels_group_manager" attrs="{'invisible': [('type', '!=', 'out_refund')], 'readonly': [('state', '!=', 'draft')]}"/>
-                        <field name="description_code_debit" groups="facturacion_electronica.l10n_co_edi_jorels_group_user,facturacion_electronica.l10n_co_edi_jorels_group_manager" attrs="{'required': [('debit_note', '=', True)], 'invisible': [('debit_note', '!=', True)]}"/>
+                        <field name="comentario" attrs="{'readonly':[('state','not in',['draft'])], 'invisible':[('type', 'not in', ['out_invoice', 'out_refund'])]}" />
+                        <field name="payment_method_id" attrs="{'readonly':[('state','not in',['draft'])], 'invisible':[('type', 'not in', ['out_invoice', 'out_refund'])]}" />
+                        <field name="payment_mean_id" attrs="{'readonly':[('state','not in',['draft'])], 'invisible':[('type', 'not in', ['out_invoice', 'out_refund'])]}" />
+                        <field name="description_code_credit" attrs="{'invisible': [('type', '!=', 'out_refund')], 'readonly': [('state', '!=', 'draft')]}"/>
+                        <field name="description_code_debit" attrs="{'required': [('debit_note', '=', True)], 'invisible': [('debit_note', '!=', True)]}"/>
                     </group>
                     <group>
                         <field name="debit_note" invisible="True"/>
                         <!--<field name="url_pdf" widget="url" readonly="True" attrs="{'invisible':['|',('invoice_status_dian','!=','Exitoso'), ('type', 'not in', ['out_invoice', 'out_refund'])]}"/>-->
                        <label string="Representación Gráfica" for="get_pdf_fact"
-                           class="o_form_label o_readonly_modifier" groups="facturacion_electronica.l10n_co_edi_jorels_group_user,facturacion_electronica.l10n_co_edi_jorels_group_manager"/>
-                        <button name="get_pdf_fact" type="object" groups="facturacion_electronica.l10n_co_edi_jorels_group_user,facturacion_electronica.l10n_co_edi_jorels_group_manager" string="Ver factura" attrs="{'invisible':['|',('invoice_status_dian','!=','Exitoso'), ('type', 'not in', ['out_invoice', 'out_refund'])]}"/>
-                        <field name="url_xml" widget="url" readonly="True" groups="facturacion_electronica.l10n_co_edi_jorels_group_user,facturacion_electronica.l10n_co_edi_jorels_group_manager" attrs="{'invisible':['|', ('invoice_status_dian', '!=', 'Exitoso'), ('type', 'not in', ['out_invoice', 'out_refund'])]}"/>
-                        <field name="invoice_status_dian" invisible="False" groups="facturacion_electronica.l10n_co_edi_jorels_group_user,facturacion_electronica.l10n_co_edi_jorels_group_manager" widget="label_selection" readonly="True"  options="{'classes': {['Fallida']: 'danger', ['Exitoso']: 'success'}}" attrs="{'invisible':[('type', 'not in', ['out_invoice', 'out_refund'])]}"/>
-                        <field name="description_status_dian" groups="facturacion_electronica.l10n_co_edi_jorels_group_user,facturacion_electronica.l10n_co_edi_jorels_group_manager" attrs="{'invisible':['|',('invoice_status_dian', '!=', 'Fallida'), ('type', 'not in', ['out_invoice', 'out_refund'])]}" readonly="True"/>
+                           class="o_form_label o_readonly_modifier"/>
+                        <button name="get_pdf_fact" type="object" string="Ver factura" attrs="{'invisible':['|',('invoice_status_dian','!=','Exitoso'), ('type', 'not in', ['out_invoice', 'out_refund'])]}"/>
+                        <field name="url_xml" widget="url" readonly="True" attrs="{'invisible':['|', ('invoice_status_dian', '!=', 'Exitoso'), ('type', 'not in', ['out_invoice', 'out_refund'])]}"/>
+                        <field name="invoice_status_dian" invisible="False" widget="label_selection" readonly="True"  options="{'classes': {['Fallida']: 'danger', ['Exitoso']: 'success'}}" attrs="{'invisible':[('type', 'not in', ['out_invoice', 'out_refund'])]}"/>
+                        <field name="description_status_dian" attrs="{'invisible':['|',('invoice_status_dian', '!=', 'Fallida'), ('type', 'not in', ['out_invoice', 'out_refund'])]}" readonly="True"/>
                     </group>
                 </xpath>
                  <page name="other_info" position="after">
