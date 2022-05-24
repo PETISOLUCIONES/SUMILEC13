@@ -432,7 +432,7 @@ class AccountMove(models.Model):
                          TaxAmtLineReteiva=str(round(abs(total_reteiva), 2)),
                          TaxAmtLineReteica=str(round(abs(total_reteica), 2)),
                          InvoiceComment=comment,
-                         InvoiceComment1=move.currency_rate,
+                         InvoiceComment1=str(move.currency_rate),
                          InvoiceComment2=move.invoice_user_id.name,
                          InvoiceComment3=str(move.comentario) if move.comentario else "",
                          InvoiceComment4=CMReasonDesc_c if invoicetype == '91' else DMReasonDesc_c if invoicetype == '92' else "",
