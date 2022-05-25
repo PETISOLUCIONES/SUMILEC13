@@ -252,7 +252,7 @@ class AccountMove(models.Model):
                     subtotal = subtotal + line_price_subtotal
                     for tax in line.tax_ids:
                         if tax.type_tax.name == 'IVA':
-                            total_impuestos += (tax.amount / 100) * line.price_subtotal
+                            total_impuestos += (tax.amount / 100) * line_price_subtotal
                         elif tax.type_tax.name == 'ReteFuente':
                             total_retenciones = total_retenciones + ((tax.amount / 100) * (
                                     (line_price_unit * line.quantity) - (
