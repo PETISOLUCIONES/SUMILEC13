@@ -252,7 +252,8 @@ class AccountMove(models.Model):
                     subtotal = subtotal + line_price_subtotal
                     for tax in line.tax_ids:
                         if tax.type_tax.name == 'IVA':
-                            total_impuestos += (tax.amount / 100) * line_price_subtotal
+                            total_impuestos += round(float_round(line_price_subtotal * tax.amount / 100,  precision_digits=2),2)
+                            #total_impuestos += (tax.amount / 100) * line_price_subtotal
                         elif tax.type_tax.name == 'ReteFuente':
                             total_retenciones = total_retenciones + ((tax.amount / 100) * (
                                     (line_price_unit * line.quantity) - (
@@ -527,7 +528,7 @@ class AccountMove(models.Model):
                     line_price_unit = float_round((line.price_subtotal/(1-(line.discount/100)))/line.quantity, precision_rounding=line.move_id.currency_id.rounding)
                     #price_unit_wo_discount = line.price_unit * (1 - (line.discount / 100.0))
                     price_unit_wo_discount = line_price_unit * (1 - (line.discount / 100.0))
-                    line_price_subtotal = round(line_price_unit, 2) * line.quantity
+                    line_price_subtotal = (round(line_price_unit, 2) * line.quantity * (1-(line.discount/100)))
                     if line_price_subtotal > 0 and not line.name in producto_regalo:
                         if len(line.tax_ids) == 0:
                             dato = dict(Company=nit_company,
