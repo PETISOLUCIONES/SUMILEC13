@@ -19,7 +19,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','l10n_co_location',  'account_debit_note', 'sale', 'account' ],
+    'depends': ['base','l10n_co_location',  'account_debit_note', 'sale', 'account', 'l10n_co'],
 
     # always loaded
     'data': [
