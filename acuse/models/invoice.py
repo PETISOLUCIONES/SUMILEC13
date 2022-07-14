@@ -578,8 +578,9 @@ class Invoice(models.Model):
                             FileNames = obj_zip.namelist()
                             for fileName in FileNames:
                                 if fileName.endswith('.xml'):
+                                    obj_zip.extract(fileName, full_ruta + '/')
                                     parser = ET.XMLParser(encoding="utf-8")
-                                    attach = ET.parse(name_zip, parser=parser)
+                                    attach = ET.parse(full_ruta + '/' + fileName, parser=parser)
                                     nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
                                                                 namespaces=NSMAP).text
                                     if nit_proveedor != move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code):

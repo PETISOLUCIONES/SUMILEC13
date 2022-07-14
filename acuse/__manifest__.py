@@ -3,10 +3,10 @@
     'name': "Envío de acuse a la DIAN",
 
     'summary': """
-            Envíar a la DIAN el acuse de las facturas recividads de los proveedores.""",
+            Envíar a la DIAN el acuse de las facturas recibidas de los proveedores.""",
 
     'description': """
-        Envíar a la DIAN el acuse de las facturas recividads de los proveedores.
+        Envíar a la DIAN el acuse de las facturas recibidas de los proveedores.
     """,
 
     'author': "PETI Soluciones Productivas",
