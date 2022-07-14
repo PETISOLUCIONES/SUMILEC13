@@ -91,7 +91,10 @@ class Invoice(models.Model):
         except:
             raise UserError("No se encontró la plantilla en la ruta " + full_file)
 
-        root = doc_xml.getroot()
+        try:
+            root = doc_xml.getroot()
+        except:
+            raise ValidationError('No obtuvo la raiz del xml')
 
         for move in self:
             '''Encabezado del acuse'''
@@ -515,7 +518,7 @@ class Invoice(models.Model):
             elif responsews.status_code == 500:
                 raise UserError("Error en la conexión al Web service")
 
-    def LeerAttachment(self, move):
+    def LeerAttachmentantier(self, move):
         attachments = move.env['ir.attachment'].search([('res_model', '=', 'account.move'), ('res_id', '=', move.id)])
         if len(attachments) > 0:
             for attach in attachments:
@@ -558,75 +561,107 @@ class Invoice(models.Model):
                                     numero_factura = attach.find('.//cbc:ParentDocumentID', namespaces=NSMAP).text
         elif move.attachment_ids:
             for attach in move.attachment_ids:
-                archivo = open(attach._full_path(attach.store_fname), 'rb').read()
-                if move.env.company.ruta_plantilla_acuse:
-                    ruta = move.env.company.ruta_plantilla_acuse + '/'
+                # if name.endswith('.zip'):
+                #     full_ruta = os.path.abspath(os.path.join('', ruta))
+                #     if not os.path.exists(full_ruta):
+                #         os.makedirs(full_ruta)
+                #
+                #     with open(full_ruta + "/temp.zip", "wb") as tmp:
+                #         tmp.write(archivo)
+                #         name_zip = full_ruta + "/temp.zip"
+                #
+                #     if zipfile.is_zipfile(name_zip):
+                #         with zipfile.ZipFile(name_zip, 'r') as obj_zip:
+                #             FileNames = obj_zip.namelist()
+                #             for fileName in FileNames:
+                #                 if fileName.endswith('.xml'):
+                #                     obj_zip.extract(fileName, full_ruta + '/')
+                #                     parser = ET.XMLParser(encoding="utf-8")
+                #                     attach = ET.parse(full_ruta + '/' + fileName, parser=parser)
+                #                     nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
+                #                                                 namespaces=NSMAP).text
+                #                     if nit_proveedor != move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code):
+                #                         raise ValidationError(
+                #                             'El NIT del xml no corresponde al NIT del proveedor de esta factura')
+                #                     firmadaText = attach.find('.//cac:Attachment/cac:ExternalReference/cbc:Description',
+                #                                               namespaces=NSMAP)
+                #                     firmada = ET.fromstring(firmadaText.text)
+                #                     InvoiceTypeRef = firmada.find('.//cbc:InvoiceTypeCode', namespaces=NSMAP).text
+                #                     CUFE = attach.find('.//cbc:UUID', namespaces=NSMAP).text
+                #                     fecha_factura = attach.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-',
+                #                                                                                                    '/')
+                #                     hora_factura = attach.find('.//cbc:IssueTime', namespaces=NSMAP).text.split('-')[0]
+                #                     fecha_completa = fecha_factura + ' ' + hora_factura
+                #                     numero_factura = attach.find('.//cbc:ParentDocumentID', namespaces=NSMAP).text
+                # else:
+                if attach.name.endswith('.xml'):
+                    archivo = base64.b64decode(attach.datas).decode("utf-8")
+
+                    try:
+                        attach = ET.fromstring(archivo)
+                        nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
+                                                    namespaces=NSMAP).text
+                        if nit_proveedor != move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code):
+                            raise ValidationError('El NIT del xml no corresponde al NIT del proveedor de esta factura')
+                        firmadaText = attach.find('.//cac:Attachment/cac:ExternalReference/cbc:Description',
+                                                  namespaces=NSMAP)
+                        firmada = ET.fromstring(firmadaText.text)
+                        InvoiceTypeRef = firmada.find('.//cbc:InvoiceTypeCode', namespaces=NSMAP).text
+                        CUFE = attach.find('.//cbc:UUID', namespaces=NSMAP).text
+                        fecha_factura = attach.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-',
+                                                                                                       '/')
+                        hora_factura = attach.find('.//cbc:IssueTime', namespaces=NSMAP).text.split('-')[0]
+                        fecha_completa = fecha_factura + ' ' + hora_factura
+                        numero_factura = attach.find('.//cbc:ParentDocumentID', namespaces=NSMAP).text
+                    except:
+                        raise ValidationError('Error al leer el xml')
                 else:
-                    ruta = 'temporal/'
-                name = attach.name
-                if name.endswith('.zip'):
-                    full_ruta = os.path.abspath(os.path.join('', ruta))
-                    if not os.path.exists(full_ruta):
-                        os.makedirs(full_ruta)
-
-                    with open(full_ruta + "/temp.zip", "wb") as tmp:
-                        tmp.write(archivo)
-                        name_zip = full_ruta + "/temp.zip"
-
-                    if zipfile.is_zipfile(name_zip):
-                        with zipfile.ZipFile(name_zip, 'r') as obj_zip:
-                            FileNames = obj_zip.namelist()
-                            for fileName in FileNames:
-                                if fileName.endswith('.xml'):
-                                    obj_zip.extract(fileName, full_ruta + '/')
-                                    parser = ET.XMLParser(encoding="utf-8")
-                                    attach = ET.parse(full_ruta + '/' + fileName, parser=parser)
-                                    nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
-                                                                namespaces=NSMAP).text
-                                    if nit_proveedor != move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code):
-                                        raise ValidationError(
-                                            'El NIT del xml no corresponde al NIT del proveedor de esta factura')
-                                    firmadaText = attach.find('.//cac:Attachment/cac:ExternalReference/cbc:Description',
-                                                              namespaces=NSMAP)
-                                    firmada = ET.fromstring(firmadaText.text)
-                                    InvoiceTypeRef = firmada.find('.//cbc:InvoiceTypeCode', namespaces=NSMAP).text
-                                    CUFE = attach.find('.//cbc:UUID', namespaces=NSMAP).text
-                                    fecha_factura = attach.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-',
-                                                                                                                   '/')
-                                    hora_factura = attach.find('.//cbc:IssueTime', namespaces=NSMAP).text.split('-')[0]
-                                    fecha_completa = fecha_factura + ' ' + hora_factura
-                                    numero_factura = attach.find('.//cbc:ParentDocumentID', namespaces=NSMAP).text
-                else:
-                    if name.endswith('.xml'):
-                        full_ruta = os.path.abspath(os.path.join('', ruta))
-                        if not os.path.exists(full_ruta):
-                            os.makedirs(full_ruta)
-
-                        archivo = base64.b64decode(attach.datas).decode("utf-8")
-
-                        try:
-                            attach = ET.fromstring(archivo)
-                            nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
-                                                        namespaces=NSMAP).text
-                            if nit_proveedor != move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code):
-                                raise ValidationError('El NIT del xml no corresponde al NIT del proveedor de esta factura')
-                            firmadaText = attach.find('.//cac:Attachment/cac:ExternalReference/cbc:Description',
-                                                      namespaces=NSMAP)
-                            firmada = ET.fromstring(firmadaText.text)
-                            InvoiceTypeRef = firmada.find('.//cbc:InvoiceTypeCode', namespaces=NSMAP).text
-                            CUFE = attach.find('.//cbc:UUID', namespaces=NSMAP).text
-                            fecha_factura = attach.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-',
-                                                                                                           '/')
-                            hora_factura = attach.find('.//cbc:IssueTime', namespaces=NSMAP).text.split('-')[0]
-                            fecha_completa = fecha_factura + ' ' + hora_factura
-                            numero_factura = attach.find('.//cbc:ParentDocumentID', namespaces=NSMAP).text
-                        except:
-                            raise ValidationError('Error al leer el xml')
+                    raise ValidationError('No hay attachments')
         else:
             raise ValidationError('Debe adjuntar un xml')
 
         move.write({'ref': numero_factura, 'fecha_fac_dian': fecha_completa.replace('/', '-'),
                     'cufe_fac_proveedor': CUFE, 'invoice_type_ref_proveedor': InvoiceTypeRef})
+
+    def LeerAttachment(self, move):
+        if move.attachment_ids:
+            for attach in move.attachment_ids:
+                if attach.name.endswith('.xml'):
+                    archivo = base64.b64decode(attach.datas).decode("utf-8")
+
+                    try:
+                        attach = ET.fromstring(archivo)
+                    except:
+                        raise ValidationError('Error al leer el xml')
+                    nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
+                                                namespaces=NSMAP).text
+                    print(nit_proveedor)
+                    nit_partner = move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code)
+                    if nit_proveedor != nit_partner:
+                        raise ValidationError('El NIT {0} del xml no corresponde al NIT {1} del proveedor de esta factura'.format(nit_proveedor, nit_partner))
+                    firmadaText = attach.find('.//cac:Attachment/cac:ExternalReference/cbc:Description',
+                                              namespaces=NSMAP)
+                    try:
+                        firmada = ET.fromstring(firmadaText.text)
+                    except:
+                        raise ValidationError('No obtuvo la firmada')
+                    InvoiceTypeRef = firmada.find('.//cbc:InvoiceTypeCode', namespaces=NSMAP).text
+                    CUFE = attach.find('.//cbc:UUID', namespaces=NSMAP).text
+                    fecha_factura = attach.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-',
+                                                                                                   '/')
+                    hora_factura = attach.find('.//cbc:IssueTime', namespaces=NSMAP).text.split('-')[0]
+                    fecha_completa = fecha_factura + ' ' + hora_factura
+                    numero_factura = attach.find('.//cbc:ParentDocumentID', namespaces=NSMAP).text
+                    print(InvoiceTypeRef, CUFE)
+                else:
+                    raise ValidationError('No hay attachments')
+        else:
+            raise ValidationError('Debe adjuntar un xml')
+
+        move.write({'ref': numero_factura if numero_factura else 'No cargo numero de factura',
+                    'fecha_fac_dian': fecha_completa.replace('/', '-') if fecha_completa else False,
+                    'cufe_fac_proveedor': CUFE if CUFE else 'No hay CUFE',
+                    'invoice_type_ref_proveedor': InvoiceTypeRef if InvoiceTypeRef else 'No hay InvoiceTypeRef'})
 
     def EncabezadoAcuse(self, move):
         # AcsHead
