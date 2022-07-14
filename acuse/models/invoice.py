@@ -647,10 +647,8 @@ class Invoice(models.Model):
                         raise ValidationError('No obtuvo la firmada')
                     InvoiceTypeRef = firmada.find('.//cbc:InvoiceTypeCode', namespaces=NSMAP).text
                     CUFE = attach.find('.//cbc:UUID', namespaces=NSMAP).text
-                    fecha_factura = attach.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-',
-                                                                                                   '/')
-                    hora_factura = attach.find('.//cbc:IssueTime', namespaces=NSMAP).text.split('-')[0]
-                    fecha_completa = fecha_factura + ' ' + hora_factura
+                    fecha_factura = attach.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-', '/')
+                    fecha_completa = fecha_factura
                     numero_factura = attach.find('.//cbc:ParentDocumentID', namespaces=NSMAP).text
                     print(InvoiceTypeRef, CUFE)
                 else:
@@ -727,7 +725,7 @@ class Invoice(models.Model):
                      RejectName=RejectName,
                      InvoiceTypeRef=move.invoice_type_ref_proveedor if move.state_acuse != '034' else "01",
                      InvoiceCufeRef=move.cufe_fac_proveedor if move.state_acuse != '034' else " ",
-                     InvoiceDateRef=move.fecha_fac_dian.strftime('%Y-%m-%d %H:%M:%S').replace('-', '/') if move.state_acuse != '034' else " ",
+                     InvoiceDateRef=move.fecha_fac_dian.strftime('%Y-%m-%d') if move.state_acuse != '034' else " ",
                      TecnicalKey=TecnicalKey,
                      IdSoftware=IdSoftware,
                      TestSet=TestSet,
