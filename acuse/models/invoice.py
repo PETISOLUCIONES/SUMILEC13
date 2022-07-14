@@ -539,7 +539,9 @@ class Invoice(models.Model):
                             FileNames = obj_zip.namelist()
                             for fileName in FileNames:
                                 if fileName.endswith('.xml'):
-                                    attach = ET.parse(name_zip)
+                                    parser = ET.XMLParser(encoding="utf-8")
+                                    attach = ET.parse(name_zip, parser=parser)
+
                                     nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
                                                             namespaces=NSMAP).text
                                     if nit_proveedor != move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code):
@@ -576,7 +578,8 @@ class Invoice(models.Model):
                             FileNames = obj_zip.namelist()
                             for fileName in FileNames:
                                 if fileName.endswith('.xml'):
-                                    attach = ET.parse(name_zip)
+                                    parser = ET.XMLParser(encoding="utf-8")
+                                    attach = ET.parse(name_zip, parser=parser)
                                     nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
                                                                 namespaces=NSMAP).text
                                     if nit_proveedor != move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code):
@@ -604,7 +607,8 @@ class Invoice(models.Model):
                             tmp.write(archivo)
                             name_zip = full_ruta + "/temp.xml"
 
-                        attach = ET.parse(name_zip)
+                        parser = ET.XMLParser(encoding="utf-8")
+                        attach = ET.parse(name_zip, parser=parser)
                         nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
                                                     namespaces=NSMAP).text
                         if nit_proveedor != move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code):
