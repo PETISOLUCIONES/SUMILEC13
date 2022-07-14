@@ -602,28 +602,28 @@ class Invoice(models.Model):
                         if not os.path.exists(full_ruta):
                             os.makedirs(full_ruta)
 
-                        archivo = open(attach._full_path(attach.store_fname), 'rb').read()
+                        archivo = base64.b64decode(attach.datas).decode("utf-8")
 
-                        with open(full_ruta + "/temp.xml", "wb") as tmp:
-                            tmp.write(archivo)
-                            name_zip = full_ruta + "/temp.xml"
-
-                        parser = ET.XMLParser(encoding="utf-8")
-                        attach = ET.parse(name_zip, parser=parser)
-                        nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
-                                                    namespaces=NSMAP).text
-                        if nit_proveedor != move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code):
-                            raise ValidationError('El NIT del xml no corresponde al NIT del proveedor de esta factura')
-                        firmadaText = attach.find('.//cac:Attachment/cac:ExternalReference/cbc:Description',
-                                                  namespaces=NSMAP)
-                        firmada = ET.fromstring(firmadaText.text)
-                        InvoiceTypeRef = firmada.find('.//cbc:InvoiceTypeCode', namespaces=NSMAP).text
-                        CUFE = attach.find('.//cbc:UUID', namespaces=NSMAP).text
-                        fecha_factura = attach.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-',
-                                                                                                       '/')
-                        hora_factura = attach.find('.//cbc:IssueTime', namespaces=NSMAP).text.split('-')[0]
-                        fecha_completa = fecha_factura + ' ' + hora_factura
-                        numero_factura = attach.find('.//cbc:ParentDocumentID', namespaces=NSMAP).text
+                        try:
+                            attach = ET.fromstring(archivo)
+                            nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
+                                                        namespaces=NSMAP).text
+                            if nit_proveedor != move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code):
+                                raise ValidationError('El NIT del xml no corresponde al NIT del proveedor de esta factura')
+                            firmadaText = attach.find('.//cac:Attachment/cac:ExternalReference/cbc:Description',
+                                                      namespaces=NSMAP)
+                            firmada = ET.fromstring(firmadaText.text)
+                            InvoiceTypeRef = firmada.find('.//cbc:InvoiceTypeCode', namespaces=NSMAP).text
+                            CUFE = attach.find('.//cbc:UUID', namespaces=NSMAP).text
+                            fecha_factura = attach.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-',
+                                                                                                           '/')
+                            hora_factura = attach.find('.//cbc:IssueTime', namespaces=NSMAP).text.split('-')[0]
+                            fecha_completa = fecha_factura + ' ' + hora_factura
+                            numero_factura = attach.find('.//cbc:ParentDocumentID', namespaces=NSMAP).text
+                        except:
+                            raise ValidationError('Error al leer el xml')
+        else:
+            raise ValidationError('Debe adjuntar un xml')
 
         move.write({'ref': numero_factura, 'fecha_fac_dian': fecha_completa.replace('/', '-'),
                     'cufe_fac_proveedor': CUFE, 'invoice_type_ref_proveedor': InvoiceTypeRef})
