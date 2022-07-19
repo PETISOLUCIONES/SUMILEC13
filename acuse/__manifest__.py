@@ -21,9 +21,7 @@
     # any module necessary for this one to work correctly
     'depends': [
         'base',
-        'account_accountant',
         'facturacion_electronica',
-        'import_fac_electronica',
     ],
 
     # always loaded

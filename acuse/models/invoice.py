@@ -155,20 +155,36 @@ class Invoice(models.Model):
             responsews = requests.post(url, data=body.encode('utf-8'), headers=headers)
 
             tipodato = type(responsews)
-            resultados = ""
+            acuse_aprobado_anterior = "Acuse con numero {0} ya aprobado con los sgtes datos".format(encabezado['AcsNum'])
             respuestaws = ""
             if responsews.status_code == 200:
                 respuesta = eval(responsews.content.decode('utf-8'))
                 if 'Respuesta' in respuesta:
                     resultados = respuesta['Respuesta']
-                    respuestaws = move.GetResponseWS(resultados)
+                    respuestaws = move.GetResponseWS(resultados).split(';')
 
-                if respuestaws == 'PROCESADO_CORRECTAMENTE':
+                if respuestaws[0] == 'PROCESADO_CORRECTAMENTE':
                     move.state_acuse = '032'
                     move.description_status_dian_acuse = respuestaws
                     move.journal_id.acuse_sequence_id._next_do()
+                elif respuestaws[0] == acuse_aprobado_anterior:
+                    if respuestaws[1] == encabezado["InvoiceRef"]:
+                        if respuestaws[2] == '030':
+                            move.state_acuse = '032'
+                            move.description_status_dian_acuse = respuestaws[0]
+                            move.journal_id.acuse_sequence_id._next_do()
+                        elif respuestaws[2] == '032':
+                            move.state_acuse = '000'
+                            move.description_status_dian_acuse = respuestaws[0]
+                            move.journal_id.acuse_sequence_id._next_do()
+                        else:
+                            move.description_status_dian_acuse = respuestaws[0]
+                            move.state_acuse = respuestaws[2]
+                            move.journal_id.acuse_sequence_id._next_do()
+                    else:
+                        move.description_status_dian_acuse = respuestaws[0] + ';' + respuestaws[1]
                 else:
-                    move.description_status_dian_acuse = respuestaws
+                    move.description_status_dian_acuse = respuestaws[0]
             elif responsews.status_code == 500:
                 raise UserError("Error en la conexión al Web service")
 
@@ -246,20 +262,36 @@ class Invoice(models.Model):
             responsews = requests.post(url, data=body.encode('utf-8'), headers=headers)
 
             tipodato = type(responsews)
-            resultados = ""
+            acuse_aprobado_anterior = "Acuse con numero {0} ya aprobado con los sgtes datos".format(encabezado['AcsNum'])
             respuestaws = ""
             if responsews.status_code == 200:
                 respuesta = eval(responsews.content.decode('utf-8'))
                 if 'Respuesta' in respuesta:
                     resultados = respuesta['Respuesta']
-                    respuestaws = move.GetResponseWS(resultados)
+                    respuestaws = move.GetResponseWS(resultados).split(';')
 
-                if respuestaws == 'PROCESADO_CORRECTAMENTE':
+                if respuestaws[0] == 'PROCESADO_CORRECTAMENTE':
                     move.state_acuse = '000'
-                    move.description_status_dian_acuse = respuestaws
+                    move.description_status_dian_acuse = respuestaws[0]
                     move.journal_id.acuse_sequence_id._next_do()
+                elif respuestaws[0] == acuse_aprobado_anterior:
+                    if respuestaws[1] == encabezado["InvoiceRef"]:
+                        if respuestaws[2] == '030':
+                            move.state_acuse = '032'
+                            move.description_status_dian_acuse = respuestaws[0]
+                            move.journal_id.acuse_sequence_id._next_do()
+                        elif respuestaws[2] == '032':
+                            move.state_acuse = '000'
+                            move.description_status_dian_acuse = respuestaws[0]
+                            move.journal_id.acuse_sequence_id._next_do()
+                        else:
+                            move.description_status_dian_acuse = respuestaws
+                            move.state_acuse = respuestaws[2]
+                            move.journal_id.acuse_sequence_id._next_do()
+                    else:
+                        move.description_status_dian_acuse = respuestaws[0] + ';' + respuestaws[1]
                 else:
-                    move.description_status_dian_acuse = respuestaws
+                    move.description_status_dian_acuse = respuestaws[0]
             elif responsews.status_code == 500:
                 raise UserError("Error en la conexión al Web service")
 
@@ -332,20 +364,38 @@ class Invoice(models.Model):
             responsews = requests.post(url, data=body.encode('utf-8'), headers=headers)
 
             tipodato = type(responsews)
-            resultados = ""
+            acuse_aprobado_anterior = "Acuse con numero {0} ya aprobado con los sgtes datos".format(encabezado['AcsNum'])
             respuestaws = ""
             if responsews.status_code == 200:
                 respuesta = eval(responsews.content.decode('utf-8'))
                 if 'Respuesta' in respuesta:
                     resultados = respuesta['Respuesta']
-                    respuestaws = move.GetResponseWS(resultados)
+                    respuestaws = move.GetResponseWS(resultados).split(';')
 
-                if respuestaws == 'PROCESADO_CORRECTAMENTE':
+                if respuestaws[0] == 'PROCESADO_CORRECTAMENTE':
                     move.description_status_dian_acuse = respuestaws
                     move.journal_id.acuse_sequence_id._next_do()
+                elif respuestaws[0] == acuse_aprobado_anterior:
+                    if respuestaws[1] == encabezado["InvoiceRef"]:
+                        if respuestaws[2] == '030':
+                            move.description_status_dian_acuse = respuestaws[0]
+                            move.state_acuse = '032'
+                            move.journal_id.acuse_sequence_id._next_do()
+                        elif respuestaws[2] == '032':
+                            move.description_status_dian_acuse = respuestaws[0]
+                            move.state_acuse = '000'
+                            move.journal_id.acuse_sequence_id._next_do()
+                        else:
+                            move.description_status_dian_acuse = respuestaws[0]
+                            move.state_acuse = respuestaws[2]
+                            move.journal_id.acuse_sequence_id._next_do()
+                    else:
+                        move.description_status_dian_acuse = respuestaws[0] + ';' + respuestaws[1]
+                        move.state_acuse = '000'
                 else:
-                    move.description_status_dian_acuse = respuestaws
+                    move.description_status_dian_acuse = respuestaws[0]
                     move.state_acuse = '000'
+
             elif responsews.status_code == 500:
                 raise UserError("Error en la conexión al Web service")
 
@@ -501,20 +551,38 @@ class Invoice(models.Model):
             responsews = requests.post(url, data=body.encode('utf-8'), headers=headers)
 
             tipodato = type(responsews)
-            resultados = ""
+            acuse_aprobado_anterior = "Acuse con numero {0} ya aprobado con los sgtes datos".format(encabezado['AcsNum'])
             respuestaws = ""
             if responsews.status_code == 200:
                 respuesta = eval(responsews.content.decode('utf-8'))
                 if 'Respuesta' in respuesta:
                     resultados = respuesta['Respuesta']
-                    respuestaws = move.GetResponseWS(resultados)
+                    respuestaws = move.GetResponseWS(resultados).split(';')
 
-                if respuestaws == 'PROCESADO_CORRECTAMENTE':
+                if respuestaws[0] == 'PROCESADO_CORRECTAMENTE':
                     move.description_status_dian_acuse = respuestaws
                     move.journal_id.acuse_sequence_id._next_do()
+                elif respuestaws[0] == acuse_aprobado_anterior:
+                    if respuestaws[1] == encabezado["InvoiceRef"]:
+                        if respuestaws[2] == '030':
+                            move.description_status_dian_acuse = respuestaws[0]
+                            move.state_acuse = '032'
+                            move.journal_id.acuse_sequence_id._next_do()
+                        elif respuestaws[2] == '032':
+                            move.description_status_dian_acuse = respuestaws[0]
+                            move.state_acuse = '000'
+                            move.journal_id.acuse_sequence_id._next_do()
+                        else:
+                            move.description_status_dian_acuse = respuestaws[0]
+                            move.state_acuse = respuestaws[2]
+                            move.journal_id.acuse_sequence_id._next_do()
+                    else:
+                        move.description_status_dian_acuse = respuestaws[0] + ';' + respuestaws[1]
+                        move.state_acuse = '000'
                 else:
-                    move.description_status_dian_acuse = respuestaws
+                    move.description_status_dian_acuse = respuestaws[0]
                     move.state_acuse = '000'
+
             elif responsews.status_code == 500:
                 raise UserError("Error en la conexión al Web service")
 
@@ -633,23 +701,24 @@ class Invoice(models.Model):
                         attach = ET.fromstring(archivo)
                     except:
                         raise ValidationError('Error al leer el xml')
-                    nit_proveedor = attach.find('.//cac:SenderParty/cac:PartyTaxScheme/cbc:CompanyID',
-                                                namespaces=NSMAP).text
-                    print(nit_proveedor)
-                    nit_partner = move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code)
-                    if nit_proveedor != nit_partner:
-                        raise ValidationError('El NIT {0} del xml no corresponde al NIT {1} del proveedor de esta factura'.format(nit_proveedor, nit_partner))
                     firmadaText = attach.find('.//cac:Attachment/cac:ExternalReference/cbc:Description',
                                               namespaces=NSMAP)
                     try:
                         firmada = ET.fromstring(firmadaText.text)
                     except:
                         raise ValidationError('No obtuvo la firmada')
+                    nit_proveedor = firmada.find('.//cac:AccountingSupplierParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID',
+                                                namespaces=NSMAP).text
+                    print(nit_proveedor)
+                    nit_partner = move.GetNitCompany(move.partner_id.vat, move.partner_id.country_id.code)
+                    if nit_proveedor != nit_partner:
+                        raise ValidationError('El NIT {0} del xml no corresponde al NIT {1} del proveedor de esta factura'.format(nit_proveedor, nit_partner))
+
                     InvoiceTypeRef = firmada.find('.//cbc:InvoiceTypeCode', namespaces=NSMAP).text
-                    CUFE = attach.find('.//cbc:UUID', namespaces=NSMAP).text
-                    fecha_factura = attach.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-', '/')
+                    CUFE = firmada.find('.//cbc:UUID', namespaces=NSMAP).text
+                    fecha_factura = firmada.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-', '/')
                     fecha_completa = fecha_factura
-                    numero_factura = attach.find('.//cbc:ParentDocumentID', namespaces=NSMAP).text
+                    numero_factura = firmada.find('.//cbc:ID', namespaces=NSMAP).text
                     print(InvoiceTypeRef, CUFE)
                 else:
                     raise ValidationError('No hay attachments')
