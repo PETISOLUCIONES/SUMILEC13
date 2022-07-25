@@ -156,6 +156,7 @@ class Invoice(models.Model):
 
             tipodato = type(responsews)
             acuse_aprobado_anterior = "Acuse con numero {0} ya aprobado con los sgtes datos".format(encabezado['AcsNum'])
+            regla90 = "Regla: 90, Rechazo: Documento procesado anteriormente."
             respuestaws = ""
             if responsews.status_code == 200:
                 respuesta = eval(responsews.content.decode('utf-8'))
@@ -183,6 +184,22 @@ class Invoice(models.Model):
                             move.journal_id.acuse_sequence_id._next_do()
                     else:
                         move.description_status_dian_acuse = respuestaws[0] + ';' + respuestaws[1]
+                elif respuestaws[0] == regla90:
+                    move.description_status_dian_acuse = respuestaws[0] + ", vuelva a enviar."
+                    move.journal_id.acuse_sequence_id._next_do()
+                elif respuestaws[0] == "El evento registrado para el acuse ya existe, con los sgtes datos ":
+                    if respuestaws[1] == '030':
+                        move.state_acuse = '032'
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.journal_id.acuse_sequence_id._next_do()
+                    elif respuestaws[1] == '032':
+                        move.state_acuse = '000'
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.journal_id.acuse_sequence_id._next_do()
+                    else:
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.state_acuse = respuestaws[1]
+                        move.journal_id.acuse_sequence_id._next_do()
                 else:
                     move.description_status_dian_acuse = respuestaws[0]
             elif responsews.status_code == 500:
@@ -263,6 +280,7 @@ class Invoice(models.Model):
 
             tipodato = type(responsews)
             acuse_aprobado_anterior = "Acuse con numero {0} ya aprobado con los sgtes datos".format(encabezado['AcsNum'])
+            regla90 = "Regla: 90, Rechazo: Documento procesado anteriormente."
             respuestaws = ""
             if responsews.status_code == 200:
                 respuesta = eval(responsews.content.decode('utf-8'))
@@ -290,6 +308,22 @@ class Invoice(models.Model):
                             move.journal_id.acuse_sequence_id._next_do()
                     else:
                         move.description_status_dian_acuse = respuestaws[0] + ';' + respuestaws[1]
+                elif respuestaws[0] == regla90:
+                    move.description_status_dian_acuse = respuestaws[0] + ", vuelva a enviar."
+                    move.journal_id.acuse_sequence_id._next_do()
+                elif respuestaws[0] == "El evento registrado para el acuse ya existe, con los sgtes datos ":
+                    if respuestaws[1] == '030':
+                        move.state_acuse = '032'
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.journal_id.acuse_sequence_id._next_do()
+                    elif respuestaws[1] == '032':
+                        move.state_acuse = '000'
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.journal_id.acuse_sequence_id._next_do()
+                    else:
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.state_acuse = respuestaws[1]
+                        move.journal_id.acuse_sequence_id._next_do()
                 else:
                     move.description_status_dian_acuse = respuestaws[0]
             elif responsews.status_code == 500:
@@ -365,6 +399,7 @@ class Invoice(models.Model):
 
             tipodato = type(responsews)
             acuse_aprobado_anterior = "Acuse con numero {0} ya aprobado con los sgtes datos".format(encabezado['AcsNum'])
+            regla90 = "Regla: 90, Rechazo: Documento procesado anteriormente."
             respuestaws = ""
             if responsews.status_code == 200:
                 respuesta = eval(responsews.content.decode('utf-8'))
@@ -392,6 +427,22 @@ class Invoice(models.Model):
                     else:
                         move.description_status_dian_acuse = respuestaws[0] + ';' + respuestaws[1]
                         move.state_acuse = '000'
+                elif respuestaws[0] == regla90:
+                    move.description_status_dian_acuse = respuestaws[0] + ", vuelva a enviar."
+                    move.journal_id.acuse_sequence_id._next_do()
+                elif respuestaws[0] == "El evento registrado para el acuse ya existe, con los sgtes datos ":
+                    if respuestaws[1] == '030':
+                        move.state_acuse = '032'
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.journal_id.acuse_sequence_id._next_do()
+                    elif respuestaws[1] == '032':
+                        move.state_acuse = '000'
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.journal_id.acuse_sequence_id._next_do()
+                    else:
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.state_acuse = respuestaws[1]
+                        move.journal_id.acuse_sequence_id._next_do()
                 else:
                     move.description_status_dian_acuse = respuestaws[0]
                     move.state_acuse = '000'
@@ -552,6 +603,7 @@ class Invoice(models.Model):
 
             tipodato = type(responsews)
             acuse_aprobado_anterior = "Acuse con numero {0} ya aprobado con los sgtes datos".format(encabezado['AcsNum'])
+            regla90 = "Regla: 90, Rechazo: Documento procesado anteriormente."
             respuestaws = ""
             if responsews.status_code == 200:
                 respuesta = eval(responsews.content.decode('utf-8'))
@@ -579,6 +631,22 @@ class Invoice(models.Model):
                     else:
                         move.description_status_dian_acuse = respuestaws[0] + ';' + respuestaws[1]
                         move.state_acuse = '000'
+                elif respuestaws[0] == regla90:
+                    move.description_status_dian_acuse = respuestaws[0] + ", vuelva a enviar."
+                    move.journal_id.acuse_sequence_id._next_do()
+                elif respuestaws[0] == "El evento registrado para el acuse ya existe, con los sgtes datos ":
+                    if respuestaws[1] == '030':
+                        move.state_acuse = '032'
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.journal_id.acuse_sequence_id._next_do()
+                    elif respuestaws[1] == '032':
+                        move.state_acuse = '000'
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.journal_id.acuse_sequence_id._next_do()
+                    else:
+                        move.description_status_dian_acuse = respuestaws[0]
+                        move.state_acuse = respuestaws[1]
+                        move.journal_id.acuse_sequence_id._next_do()
                 else:
                     move.description_status_dian_acuse = respuestaws[0]
                     move.state_acuse = '000'
@@ -719,6 +787,11 @@ class Invoice(models.Model):
                     fecha_factura = firmada.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-', '/')
                     fecha_completa = fecha_factura
                     numero_factura = firmada.find('.//cbc:ID', namespaces=NSMAP).text
+                    organization_type_id = firmada.find(
+                        './/cac:AccountingSupplierParty/cbc:AdditionalAccountID',
+                        namespaces=NSMAP)
+                    if organization_type_id.text:
+                        move.partner_id.organization_type_id = int(organization_type_id.text)
                     print(InvoiceTypeRef, CUFE)
                 else:
                     raise ValidationError('No hay attachments')
