@@ -782,11 +782,11 @@ class Invoice(models.Model):
                     if nit_proveedor != nit_partner:
                         raise ValidationError('El NIT {0} del xml no corresponde al NIT {1} del proveedor de esta factura'.format(nit_proveedor, nit_partner))
 
-                    InvoiceTypeRef = firmada.find('.//cbc:InvoiceTypeCode', namespaces=NSMAP).text
-                    CUFE = firmada.find('.//cbc:UUID', namespaces=NSMAP).text
-                    fecha_factura = firmada.find('.//cbc:IssueDate', namespaces=NSMAP).text.replace('-', '/')
+                    InvoiceTypeRef = firmada.find('./cbc:InvoiceTypeCode', namespaces=NSMAP).text
+                    CUFE = firmada.find('./cbc:UUID', namespaces=NSMAP).text
+                    fecha_factura = firmada.find('./cbc:IssueDate', namespaces=NSMAP).text.replace('-', '/')
                     fecha_completa = fecha_factura
-                    numero_factura = firmada.find('.//cbc:ID', namespaces=NSMAP).text
+                    numero_factura = firmada.find('./cbc:ID', namespaces=NSMAP).text
                     organization_type_id = firmada.find(
                         './/cac:AccountingSupplierParty/cbc:AdditionalAccountID',
                         namespaces=NSMAP)
