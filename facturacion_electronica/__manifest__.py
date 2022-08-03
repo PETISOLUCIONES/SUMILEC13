@@ -37,6 +37,7 @@
         'data/dian_debit_note_concept.xml',
         'data/dian_payment_mean.xml',
         'data/mail_template_electronic.xml',
+        'data/product_product.xml',
         'views/views.xml',
         'views/templates.xml',
         'views/mail_invoice.xml',

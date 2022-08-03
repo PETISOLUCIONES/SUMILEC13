@@ -137,7 +137,7 @@
      <field name="inherit_id" ref="account.view_account_journal_form"/>
      <field name="arch" type="xml">
          <field name="refund_sequence" position="after">
-            <field name="debit_note"/>
+            <field name="debit_note" attrs="{'invisible': [('type', '!=', 'sale')]}"/>
         </field>
         <!-- <xpath expr="//page[@name='advanced_settings']/group" position="inside">
             <group string="Resolución DIAN" attrs="{'invisible':[('type', '!=', 'sale')]}">
@@ -350,7 +350,7 @@
           <field name="inherit_id" ref="account.view_account_move_reversal"/>
           <field name="arch" type="xml">
             <field name="reason" position="after">
-                <field name="concept_note_credit_id"/>
+                <field name="concept_note_credit_id" attrs="{'invisible': [('move_type', '!=', 'out_invoice')]}"/>
             </field>
           </field>
       </record>

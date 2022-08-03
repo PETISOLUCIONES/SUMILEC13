@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <EDocument>
   <InvcHead>
     <Company></Company>
@@ -6,37 +6,21 @@
     <InvoiceNum></InvoiceNum>
     <LegalNumber></LegalNumber>
     <InvoiceRef></InvoiceRef>
-    <InvoiceTypeRef></InvoiceTypeRef>
-    <InvoiceDateRef></InvoiceDateRef>
-    <DueDateRef></DueDateRef>   
-    <CMReasonCode_c></CMReasonCode_c>
-    <CMReasonDesc_c></CMReasonDesc_c> 
-    <DMReasonCode_c></DMReasonCode_c>
-    <DMReasonDesc_c></DMReasonDesc_c>
+    <DiscrepansyDescription></DiscrepansyDescription>
+    <DiscrepansyCode></DiscrepansyCode>
     <CustNum></CustNum>
     <ContactName></ContactName>
-    <ContactCountry></ContactCountry>
-    <ContactCity></ContactCity>
-    <ContactAddress></ContactAddress>
     <CustomerName></CustomerName>
     <InvoiceDate></InvoiceDate>
     <DueDate></DueDate>
+    <DspDocSubTotal></DspDocSubTotal>
+    <DocTaxAmt></DocTaxAmt>
     <DocWHTaxAmt></DocWHTaxAmt>
-    <TaxAmtLineReteiva></TaxAmtLineReteiva>
-    <TaxAmtLineReteica></TaxAmtLineReteica>
+    <DspDocInvoiceAmt></DspDocInvoiceAmt>
     <InvoiceComment></InvoiceComment>
     <InvoiceComment1></InvoiceComment1>
-    <InvoiceComment2></InvoiceComment2>
-    <InvoiceComment3></InvoiceComment3>
-    <InvoiceComment4></InvoiceComment4>
-    <CurrencyCode></CurrencyCode>
     <CurrencyCodeCurrencyID></CurrencyCodeCurrencyID>
-    <ContingencyInvoice></ContingencyInvoice>
-    <NetWeight></NetWeight>
-    <GrossWeight></GrossWeight>
-    <NumberBoxes></NumberBoxes>
-    <PONum></PONum>
-    <Remission></Remission>
+    <CurrencyCode></CurrencyCode>
     <Resolution></Resolution>
     <ResolutionPrefix></ResolutionPrefix>
     <ResolutionDateInvoice></ResolutionDateInvoice>
@@ -47,8 +31,8 @@
     <TecnicalKey></TecnicalKey>
     <IdSoftware></IdSoftware>
     <TestSet></TestSet>
-    <PinSoftware></PinSoftware>  
-    <InvoicePeriod></InvoicePeriod> 
+    <PinSoftware></PinSoftware>
+    <Discount></Discount>
     <PaymentMeansID_c></PaymentMeansID_c>
     <PaymentMeansDescription></PaymentMeansDescription>
     <PaymentMeansCode_c></PaymentMeansCode_c>
@@ -56,21 +40,6 @@
     <PaymentDueDate></PaymentDueDate>
     <CalculationRate_c></CalculationRate_c>
     <DateCalculationRate_c></DateCalculationRate_c>
-    <ConditionPay></ConditionPay>   
-    <DspDocSubTotal></DspDocSubTotal>
-    <DocTaxAmt></DocTaxAmt>
-    <DspDocInvoiceAmt></DspDocInvoiceAmt>
-    <Discount></Discount>
-    <GlobalDiscount></GlobalDiscount>
-    <TypeofTrasport></TypeofTrasport>
-    <PortoofShipment></PortoofShipment>
-    <PortofEntry></PortofEntry>
-    <DateofLoading></DateofLoading>
-    <GrossWeight></GrossWeight>
-    <NetWeight></NetWeight>
-    <PorcAdministracion></PorcAdministracion>
-    <PorcImprevistos></PorcImprevistos>
-    <PorcUtilidad></PorcUtilidad>
   </InvcHead>
   <InvcDtls>
     <InvcDtl>
@@ -91,10 +60,8 @@
       <DspDocLessDiscount></DspDocLessDiscount>
       <DspDocTotalMiscChrg></DspDocTotalMiscChrg>
       <CurrencyCode></CurrencyCode>
-      <LineComment></LineComment>
-      <LineComment1></LineComment1>
-      <LineComment2></LineComment2>
-      <LineComment3></LineComment3>
+      <DocPeriod></DocPeriod>
+      <PurchaseDate></PurchaseDate>    
     </InvcDtl>
   </InvcDtls>
   <InvcTaxs>
@@ -132,7 +99,6 @@
     <Name></Name>
     <RegimeType_c></RegimeType_c>
     <FiscalResposability_c></FiscalResposability_c>
-    <OperationType_c></OperationType_c>
     <CompanyType_c></CompanyType_c>
     <State></State>
     <StateNum></StateNum>
@@ -143,11 +109,13 @@
     <CountryName></CountryName>
     <CountryCode></CountryCode>
     <OrderNum></OrderNum>
+    <DateOrder></DateOrder>
     <PostalZone></PostalZone>
     <PhoneNum></PhoneNum>
     <Email></Email>
     <WebPage></WebPage>
     <CorporateRegistration></CorporateRegistration>
+    <TypeOfOrigin></TypeOfOrigin>
   </Company>
   <Customer>
     <Company></Company>
@@ -187,10 +155,4 @@
     <CountryName></CountryName>
     <CountryCode></CountryCode>
   </COOneTime>
-  <Attachements>
-    <InvcAttached>
-      <Attached></Attached>
-      <name></name>
-    </InvcAttached>
-  </Attachements>
 </EDocument>
